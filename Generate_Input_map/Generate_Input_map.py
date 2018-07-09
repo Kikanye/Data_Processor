@@ -99,6 +99,7 @@ def get_fields(filename, header_row=None):
         exit(1)
     return data
 
+
 def main():
     """This function opens the .ini file with the specifications and then generates the json template for the file."""
     spec_data={}
@@ -117,6 +118,24 @@ def main():
         json.dump(spec_data, write_file, indent=4)
     return
 
+
+def generate_sample_input_map(template_file, input_file, json_template):
+    json_template_contents={}
+    with open('json_template', 'r') as template_json:
+        json_template_contents=json.load(template_json)
+    header_name_list=json_template_contents["header_list"]
+    for item in header_name_list:
+        col=input("Which columns contains the "+item+"? (Use number or excel column letter)")
+        col=''
+        if(col.isdigit()):
+            print("Column number entered.")
+            # TODO: Assign column number in here.
+        elif(col.isalpha()):
+            print("Column letter entered.")
+            # TODO: Assign column number in here.
+            # TODO: FInish algorith to generate the JSON dictionary
+
+    return
 
 print("Starting to generate json template.")
 main()

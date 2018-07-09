@@ -40,7 +40,6 @@ def handle_csv_input(filename, input_specs):
             data["datetime"] = pd.to_datetime(data["datetime"])
     data=data.where(pd.notnull(data), None)
     data_list = data.to_dict('records')
-    ll=data_list[-1]
     return data_list
 
 
@@ -135,7 +134,7 @@ def handle_xlsx_output(filename, out_list, in_filename, output_specs):
             cell = template_specs["fields"][key]["column_letter"] + str(row)
             wk_sheet[cell] = value
         row += 1
-    workbook.save(inf+filename)
+    workbook.save(inf+'-'+filename)
     return
 
 

@@ -85,7 +85,7 @@ def writerows(filename, row_list, specs):
             cell = template_specs["fields"][key]["column_letter"] + str(row)
             wk_sheet[cell] = value
         row += 1
-    workbook.save("_normalized"+filename)
+    workbook.save("_normalized-"+filename)
     return
 
 
