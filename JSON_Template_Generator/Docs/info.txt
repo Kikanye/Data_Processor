@@ -1,0 +1,18 @@
+Json Output
+-----------
+
+The Json Output generated for the template file will have 3 key/value pairs:
+    -> 'fields': which will be dictionary with many dictionaries, each one will
+        have a key which is the column name, and the values will be dictionaries which will have 3 fields:
+            -> 'type': which will be the type of value in this column
+            -> 'column_letter': which will be the excel letter equivalent of the number of the column.
+
+    -> 'header_row': A string representation of the row number which will have all the column headers
+    -> 'header_list': A list which contains all the names of the rows from the template file, in the order that they
+     are in the file.
+    -> 'row_template': which will be a dictionary with all the names of the column headers as keys,
+     and they will all point to null
+
+    -> See sample_template.json for an example of a file that will be generated for sample_template.xlsx
+
+The Json Output will have all the column headers in lower case and all the white spaces replaced with '_'

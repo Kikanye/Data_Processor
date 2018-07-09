@@ -1,0 +1,8 @@
+{"mappings":{"beacon_id":1, "date":2, "month":3, "day":4, "year":5, "hour":6,
+             "minute":7, "seconds":8, "am/pm":9, "latitude":10, "n/s":11, "longitude":12,
+             "e/w":13, "speed":14, "direction":15},
+ "header_row":1,
+ "header_list":["beacon_id", "date", "month", "day", "year", "hour",
+                "minute", "seconds", "am/pm", "latitude", "n/s", "longitude", "e/w",
+                "speed", "direction"],
+ "formats":{"date":"%Y-%m-%d"}}

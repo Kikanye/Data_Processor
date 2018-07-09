@@ -1,0 +1,6 @@
+{"mappings":{"beacon_id":1, "time":2, "date":3, "latitude":4, "longitude":5, "altitude":6,
+             "speed":7, "direction":8, "fix":9, "sat":10},
+ "header_row":1,
+ "header_list":["beacon_id", "time", "date", "latitude", "longitude", "altitude",
+                "speed", "direction", "fix", "sat"],
+ "formats":{}}

@@ -1,0 +1,268 @@
+{
+    "fields": {
+        "fix": {
+            "type": null, 
+            "column_letter": "Y", 
+            "column_number": 25
+        }, 
+        "beacon_alarm_state": {
+            "type": null, 
+            "column_letter": "AG", 
+            "column_number": 33
+        }, 
+        "wind_direction": {
+            "type": null, 
+            "column_letter": "AK", 
+            "column_number": 37
+        }, 
+        "datetime": {
+            "type": null, 
+            "column_letter": "D", 
+            "column_number": 4
+        }, 
+        "modem_voltage": {
+            "type": null, 
+            "column_letter": "AI", 
+            "column_number": 35
+        }, 
+        "am/pm": {
+            "type": null, 
+            "column_letter": "M", 
+            "column_number": 13
+        }, 
+        "julian_day": {
+            "type": null, 
+            "column_letter": "C", 
+            "column_number": 3
+        }, 
+        "year": {
+            "type": null, 
+            "column_letter": "F", 
+            "column_number": 6
+        }, 
+        "calculated_speed": {
+            "type": null, 
+            "column_letter": "U", 
+            "column_number": 21
+        }, 
+        "speed": {
+            "type": null, 
+            "column_letter": "T", 
+            "column_number": 20
+        }, 
+        "n/s": {
+            "type": null, 
+            "column_letter": "P", 
+            "column_number": 16
+        }, 
+        "short_id": {
+            "type": null, 
+            "column_letter": "B", 
+            "column_number": 2
+        }, 
+        "altitude": {
+            "type": null, 
+            "column_letter": "S", 
+            "column_number": 19
+        }, 
+        "battery_voltage": {
+            "type": null, 
+            "column_letter": "AH", 
+            "column_number": 34
+        }, 
+        "beacon_id": {
+            "type": null, 
+            "column_letter": "A", 
+            "column_number": 1
+        }, 
+        "e/w": {
+            "type": null, 
+            "column_letter": "R", 
+            "column_number": 18
+        }, 
+        "temp_external": {
+            "type": null, 
+            "column_letter": "AE", 
+            "column_number": 31
+        }, 
+        "latitude": {
+            "type": null, 
+            "column_letter": "O", 
+            "column_number": 15
+        }, 
+        "sat": {
+            "type": null, 
+            "column_letter": "Z", 
+            "column_number": 26
+        }, 
+        "direction": {
+            "type": null, 
+            "column_letter": "X", 
+            "column_number": 24
+        }, 
+        "vdop": {
+            "type": null, 
+            "column_letter": "AB", 
+            "column_number": 28
+        }, 
+        "hdop": {
+            "type": null, 
+            "column_letter": "AA", 
+            "column_number": 27
+        }, 
+        "seconds": {
+            "type": null, 
+            "column_letter": "K", 
+            "column_number": 11
+        }, 
+        "pressure": {
+            "type": null, 
+            "column_letter": "AD", 
+            "column_number": 30
+        }, 
+        "date": {
+            "type": null, 
+            "column_letter": "E", 
+            "column_number": 5
+        }, 
+        "month": {
+            "type": null, 
+            "column_letter": "G", 
+            "column_number": 7
+        }, 
+        "day": {
+            "type": null, 
+            "column_letter": "H", 
+            "column_number": 8
+        }, 
+        "minute": {
+            "type": null, 
+            "column_letter": "J", 
+            "column_number": 10
+        }, 
+        "wind_speed": {
+            "type": null, 
+            "column_letter": "AJ", 
+            "column_number": 36
+        }, 
+        "temp_internal": {
+            "type": null, 
+            "column_letter": "AF", 
+            "column_number": 32
+        }, 
+        "hour": {
+            "type": null, 
+            "column_letter": "I", 
+            "column_number": 9
+        }, 
+        "part_day": {
+            "type": null, 
+            "column_letter": "N", 
+            "column_number": 14
+        }, 
+        "longitude": {
+            "type": null, 
+            "column_letter": "Q", 
+            "column_number": 17
+        }, 
+        "calculated_heading": {
+            "type": null, 
+            "column_letter": "W", 
+            "column_number": 23
+        }, 
+        "time": {
+            "type": null, 
+            "column_letter": "L", 
+            "column_number": 12
+        }, 
+        "vertical_velocity": {
+            "type": null, 
+            "column_letter": "AC", 
+            "column_number": 29
+        }, 
+        "heading": {
+            "type": null, 
+            "column_letter": "V", 
+            "column_number": 22
+        }
+    }, 
+    "header_row": "1", 
+    "header_list": [
+        "beacon_id", 
+        "short_id", 
+        "julian_day", 
+        "datetime", 
+        "date", 
+        "year", 
+        "month", 
+        "day", 
+        "hour", 
+        "minute", 
+        "seconds", 
+        "time", 
+        "am/pm", 
+        "part_day", 
+        "latitude", 
+        "n/s", 
+        "longitude", 
+        "e/w", 
+        "altitude", 
+        "speed", 
+        "calculated_speed", 
+        "heading", 
+        "calculated_heading", 
+        "direction", 
+        "fix", 
+        "sat", 
+        "hdop", 
+        "vdop", 
+        "vertical_velocity", 
+        "pressure", 
+        "temp_external", 
+        "temp_internal", 
+        "beacon_alarm_state", 
+        "battery_voltage", 
+        "modem_voltage", 
+        "wind_speed", 
+        "wind_direction"
+    ], 
+    "row_template": {
+        "fix": null, 
+        "beacon_alarm_state": null, 
+        "wind_direction": null, 
+        "datetime": null, 
+        "modem_voltage": null, 
+        "am/pm": null, 
+        "julian_day": null, 
+        "year": null, 
+        "calculated_speed": null, 
+        "speed": null, 
+        "n/s": null, 
+        "short_id": null, 
+        "altitude": null, 
+        "battery_voltage": null, 
+        "beacon_id": null, 
+        "e/w": null, 
+        "temp_external": null, 
+        "latitude": null, 
+        "sat": null, 
+        "direction": null, 
+        "vdop": null, 
+        "hdop": null, 
+        "seconds": null, 
+        "pressure": null, 
+        "date": null, 
+        "month": null, 
+        "day": null, 
+        "minute": null, 
+        "wind_speed": null, 
+        "temp_internal": null, 
+        "hour": null, 
+        "part_day": null, 
+        "longitude": null, 
+        "calculated_heading": null, 
+        "time": null, 
+        "vertical_velocity": null, 
+        "heading": null
+    }
+}
