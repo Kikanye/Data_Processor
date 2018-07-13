@@ -14,7 +14,9 @@ def main():
 
     INPUT_FILE = Config.get('INPUT', 'I_FILE')
     input_filename_split = INPUT_FILE.split('.')
-    INPUT_SPEC = ''.join(input_filename_split[0:len(input_filename_split)-1])+'_input_mappings.json'
+    INPUT_SPEC = Config.get('INPUT', 'I_MAP')
+    if(INPUT_SPEC.strip()==''):
+        INPUT_SPEC = ''.join(input_filename_split[0:len(input_filename_split)-1])+'_input_mappings.json'
 
     input_file_part_name = ''.join(input_filename_split[0:len(input_filename_split)-1])
     DATA_FILE = input_file_part_name+'-'+TEMPLATE_FILE

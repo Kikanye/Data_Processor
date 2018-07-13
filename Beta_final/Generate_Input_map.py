@@ -59,8 +59,8 @@ def generate_sample_input_map(json_template):
 
 def main():
     Config = configparser.ConfigParser()
-    Config.read('Input-map_Generate_Settings.ini')
-    TEMPLATE_FILE = Config.get('FILES_INFO', 'JSON_TEMPLATE')
+    Config.read('Loader_Config.ini')
+    TEMPLATE_FILE = Config.get('FILES_INFO', 'TEMPLATE_NAME')
     SPEC_FILE = Config.get('FILES_INFO', 'SPEC_FILE')
     data = generate_sample_input_map(TEMPLATE_FILE)
 

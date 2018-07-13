@@ -48,6 +48,9 @@ def datetime_work(row, formats):
     row["minute"] = curr_dt_handler.get_minute()
     row["seconds"] = curr_dt_handler.get_seconds()
     row["am/pm"] = curr_dt_handler.get_am_pm()
+    row["julian_day"] = curr_dt_handler.get_julian_day()
+    row["part_day"] = curr_dt_handler.get_part_day()
+
     return row
 
 

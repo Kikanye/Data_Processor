@@ -7,6 +7,10 @@ class DatetimeHandler:
     process_date_format = "%d-%m-%Y"
     process_time_format = "%I:%M:%S%p"
     process_datetime_format = "%d-%m-%Y %I:%M:%S%p"
+    SECONDS_IN_DAY = 24.0*60.0*60.0
+    HOURS_TO_MIN = 60.0
+    MINS_TO_SECS = 60.0
+    HOURS_TO_SECONDS = HOURS_TO_MIN*MINS_TO_SECS
 
     def __init__(self):
         self.date_time = None
@@ -20,7 +24,16 @@ class DatetimeHandler:
         self.seconds = None
         self.am_pm = None
         self.julian_day = None
+        self.part_day = None
 
+    def __calculate_part_day(self, hours, minutes=0.0, seconds=0.0):
+        part_day = None
+        if hours is not None:
+            coeff = 1.0/DatetimeHandler.SECONDS_IN_DAY
+            hr_secs = hours*DatetimeHandler.HOURS_TO_SECONDS
+            min_secs = minutes*DatetimeHandler.MINS_TO_SECS
+            part_day = coeff*(hr_secs+min_secs+seconds)
+        return part_day
 
     def __process_datetime(self, dt_time):
         self.date = dt_time.date()
@@ -32,10 +45,12 @@ class DatetimeHandler:
         self.minute = dt_time.minute
         self.seconds = dt_time.second
         self.am_pm = dt_time.strftime("%p")
+        self.julian_day = int(dt_time.strftime("%j"))
+        self.part_day = self.__calculate_part_day(dt_time.hour, dt_time.minute, dt_time.second)
+
         return
 
     def process(self):
-        # TODO: Remove this declaration.
         if self.date_time is not None:
             self.__process_datetime(self.date_time)
         elif (self.date is not None) and (self.time is not None):
@@ -46,24 +61,32 @@ class DatetimeHandler:
             self.day = self.date.day
             self.month = self.date.month
             self.year = self.date.year
+            self.julian_day = int(self.date.strftime("%j"))
         elif self.time is not None:
             self.hour = self.time.hour
             self.minute = self.time.minute
             self.seconds = self.time.second
             self.am_pm = self.time.strftime("%p")
+            self.part_day = self.__calculate_part_day(self.time.hour, self.time.minute, self.time.second)
         if (self.day is not None) and (self.month is not None) and (self.year is not None) and(self.date is None):
             self.date = datetime.date(day=int(self.day), month=int(self.month), year=int(self.year))
+            self.julian_day = int(self.date.strftime("%j"))
+
         if (self.hour is not None) and (self.minute is not None) and (self.seconds is not None) and (self.time is None):
             self.time=datetime.time(hour=int(self.hour), minute=int(self.minute), second=int(self.seconds))
             self.am_pm = self.time.strftime("%p")
+            self.part_day = self.__calculate_part_day(self.time.hour, self.time.minute, self.time.second)
+
         if (self.hour is not None) and (self.minute is not None) and (self.seconds is None):
             self.time=datetime.time(hour=int(self.hour), minute=int(self.minute))
             self.am_pm = self.time.strftime("%p")
+            self.part_day = self.__calculate_part_day(self.time.hour, self.time.minute, self.time.second)
 
         if (self.date is not None) and (self.time is not None):
             self.date_time = datetime.datetime(day=self.date.day, month=self.date.month,
                                                year=self.date.year, hour=self.time.hour,
                                                minute=self.time.minute, second=self.time.second)
+            self.__process_datetime(self.date_time) # TODO: Confirm that this is not redundant
 
         return
 
@@ -183,3 +206,15 @@ class DatetimeHandler:
             else:
                 time_string=self.time.strftime(str_format)
         return time_string
+
+    def get_julian_day(self):
+        julian_day_str = None
+        if self.julian_day is not None:
+            julian_day_str = str(self.julian_day)
+        return julian_day_str
+
+    def get_part_day(self):
+        part_day_str = None
+        if self.part_day is not None:
+            part_day_str = str(self.part_day)
+        return part_day_str
