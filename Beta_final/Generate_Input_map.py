@@ -13,7 +13,7 @@ import configparser
 
 def generate_sample_input_map(json_template):
     """This function takes in the json template for the template file,
-    and generates a JSON input map from that."""
+    and generates a JSON input map for the input file by asking the user questions."""
     return_dict = {"mappings":{}, "header_row":1, "header_list":[], "formats":{}}
     with open(json_template, 'r') as template_json:
         json_template_contents = json.load(template_json)
@@ -30,17 +30,23 @@ def generate_sample_input_map(json_template):
                 print("Column number entered.")
                 correct_input = True
                 return_dict["mappings"][item] = int(col)
-                return_dict["header_list"].append(item)
+                #return_dict["header_list"].append(item)
                 if(seek_format):
-                    fmt = raw_input("Enter the format for "+item+" (using Python datetime style.)")
-                    if('%' in fmt) and (fmt != ''):
-                        return_dict['formats'][item] = fmt.strip()
+                    valid_format = False
+                    while(not(valid_format)):
+                        fmt = raw_input("Enter the format for "+item+" (using Python datetime style.)")
+                        fmt.strip()
+                        if('%' in fmt) and (fmt != ''):
+                            valid_format=True
+                            return_dict['formats'][item] = fmt.strip()
+                        else:
+                            print("Invalid format entered.")
             elif(col.isalpha()):
                 print("Column letter entered.")
                 correct_input = True
                 col_num = openpyxl.utils.column_index_from_string(col)
                 return_dict["mappings"][item] = col_num
-                return_dict["header_list"].append(item)
+                #return_dict["header_list"].append(item)
                 if seek_format :
                     fmt = raw_input("Enter the format for "+item+" (using Python datetime style.)")
                     if('%' in fmt) and (fmt != ''):
@@ -54,14 +60,17 @@ def generate_sample_input_map(json_template):
     if (header_row.strip() != '1') and (header_row != '') and (header_row.isdigit()):
         header_row=int(header_row)
         return_dict["header_row"] = header_row
+    sorted_headers=sorted(return_dict['mappings'].items(), key=lambda x:(x[1]))
+    for item in sorted_headers:
+        return_dict["header_list"].append(item[0])
     return return_dict
 
 
 def main():
     Config = configparser.ConfigParser()
     Config.read('Loader_Config.ini')
-    TEMPLATE_FILE = Config.get('FILES_INFO', 'TEMPLATE_NAME')
-    SPEC_FILE = Config.get('FILES_INFO', 'SPEC_FILE')
+    TEMPLATE_FILE = Config.get('TEMPLATE_INFO', 'TEMPLATE_PATH')
+    SPEC_FILE = Config.get('TEMPLATE_INFO', 'TEMPLATE_MAP_PATH')
     data = generate_sample_input_map(TEMPLATE_FILE)
 
     with open(SPEC_FILE, "w") as data_file:
@@ -69,7 +78,7 @@ def main():
     return
 
 
-main()
+#main()
 
 
 

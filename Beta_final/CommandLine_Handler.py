@@ -1,62 +1,193 @@
-import Main
 import sys
 import os
+import shutil
 import pathlib2
+import json
+import JSON_Template_Generator, Data_Loader, Normalizer, Generate_Input_map
+import configparser
 
-def handle_dir_input():
-    # TODO: Implement algorithm to handle directory as input
-    return
 
-def handle_file_input():
-    # TODO: Implement algorithm to handle file as input
-    return
-
-tst=os.listdir('C:\Users\CEOS\PycharmProjects\Data_Processor')
-testdir=tst[-1]
-the_path=testdir
-the_curr_path=pathlib2.Path(the_path)
-ttst=the_curr_path.is_dir()
-
-xxt = pathlib2.Path('Loader_Config.ini')
-ttt=xxt.exists()
-lts=xxt.is_file()
-
-arguments=sys.argv
-input_file=''
-template_file=''
-input_map_file=''
-input_header_number=''
-template_header_number=''
-
-if(len(arguments)<3):
-    print("At least 2 arguments are required for the scripts to run successfully.")
-else:
-    print("complete args...")
-    input_file_or_dir = arguments[1]
-    template_file = arguments[2]
-    if(len(arguments)==4):
-        input_map_file=arguments[3]
-    if(len(arguments)==5):
-        input_header_number = arguments[4]
-    if len(arguments) == 6:
-        template_header_number = arguments[5]
-
-input_path = pathlib2.Path(input_file_or_dir)
-if(input_path.exists()):
-    if(input_path.is_file()):
-        handle_file_input()
-    elif(input_path.is_dir()):
-        handle_dir_input()
+def parse_arguments(arguments):
+    arg_dict = {'input': None,'template': None, 'input_map': None, 'template_header': None}
+    if ('=' in arguments[1] or '=' in arguments[2]):
+        raise Exception("Invalid character found in first and/or second argument,\n"
+                        "First and/or second arguments must not have '=' signs, must be raw file paths.")
     else:
-        print("Invalid argument for input file, it is neither a directory or a file.")
+        arg_dict['input'] = arguments[1].strip()
+        arg_dict['template'] = arguments[2].strip()
+    for arg in arguments[3:]:
+        if('=' not in arg):
+            raise Exception("Invalid argument supplied, all arguments except the first and the second must be in the form,"
+                  " field=value")
+            exit(1)
+        arg_split = arg.split('=')
+        arg_name = arg_split[0].strip()
+        arg_variable = arg_split[1].strip()
+        arg_dict[arg_name] = arg_variable
+
+    return arg_dict
 
 
+def handle_file_input(input_file, template_path, template_map_path, formats, directories, input_map_path=None):
+    # TODO: Implement algorithm to handle file as input
+    if(input_map_path==None or input_map_path==''):
+        input_path = pathlib2.Path(input_file)
+        input_fname = input_path.name
+        input_fname_split = input_fname.split('.')
+        parent_dir = pathlib2.Path(input_path.parent)
+        input_map_path = str(parent_dir.joinpath(input_fname_split[0]+'_input_mappings.json'))
+        data = Generate_Input_map.generate_sample_input_map(template_map_path)
 
-def handle_dir_input():
+        with open(input_map_path, "w") as data_file:
+            json.dump(data, data_file, indent=2)
+
+    loaded_data_path = Data_Loader.transfer_values(input_file, template_path, input_map_path, template_map_path,
+                                                   directories['outputs']['loaded'])
+    row_list = Normalizer.normalize(loaded_data_path, template_map_path, formats)
+    normalized_path = Normalizer.writerows(loaded_data_path, row_list, template_map_path)
+
+    loaded_data_path_obj = pathlib2.Path(loaded_data_path)
+    loaded_data_parent = loaded_data_path_obj.parent
+    loaded_data_destination =(loaded_data_parent.joinpath(directories["outputs"])).joinpath(directories['loaded'])
+    print(loaded_data_path)
+    print(loaded_data_destination)
+    shutil.move(loaded_data_path, str(loaded_data_destination))
+
+    normalized_path_obj = pathlib2.Path(normalized_path)
+    normalized_path_parent = normalized_path_obj.parent
+    normalized_data_destination = (normalized_path_parent.joinpath(directories["outputs"])).\
+        joinpath(directories['normalized'])
+    shutil.move(normalized_path, str(normalized_data_destination))
+
+    ip_map = pathlib2.Path(input_map_path)
+    ip_parent = ip_map.parent
+    json_templates_path = ip_parent.joinpath(directories['json_maps'])
+
+    shutil.move(str(ip_map), str(json_templates_path))
 
     return
 
-def handle_file_input():
+
+def handle_dir_input(dir_path, template_path, template_map_path, formats, directories, same_file_formats,
+                     input_map_path=None):
+    # TODO: Implement algorithm to handle directory as input
+    files_list=[]
+    dir_path_object = pathlib2.Path(dir_path)
+    for item in dir_path_object.iterdir():
+        files_list.append(str(item))
+
+    if(same_file_formats):
+        if(input_map_path==None or input_map_path==''):
+            input_path = pathlib2.Path(files_list[0])
+            parent_dir = pathlib2.Path(input_path.parent)
+            input_map_path = str(parent_dir.joinpath('_input_mappings.json'))
+            data = Generate_Input_map.generate_sample_input_map(template_map_path)
+
+            with open(input_map_path, "w") as data_file:
+                json.dump(data, data_file, indent=2)
+
+        for file in files_list:
+            handle_file_input(file, template_path, template_map_path, formats, input_map_path)
+        ip_map = pathlib2.Path(input_map_path)
+        ip_parent = ip_map.parent
+        json_templates_path = ip_parent.joinpath(directories['json_maps'])
+        shutil.move(str(ip_map), str(json_templates_path))
+    else:
+        count=1
+        for file in files_list:
+            if(input_map_path is None) or input_map_path == '':
+                print("Fill in data location information for {}".format(pathlib2.Path(file).name))
+                handle_file_input(file, template_path, template_map_path, formats, directories)
+            # TODO: Remove this unnecessary parts of the code.
+            else:
+                if(count==1):
+                    handle_file_input(file, template_path, template_map_path, formats, directories, input_map_path)
+            count+=1
+
     return
 
+
+def main():
+    Config = configparser.ConfigParser()
+    Config.read('CommandLine_Config.ini')
+    """outputs_dir = Config.get('DIRECTORIES', 'OUTPUTS_DIR')
+    loaded_dir = Config.get('DIRECTORIES', 'LOADED_DIR')
+    normalized_dir = Config.get('DIRECTORIES', 'NORMALIZED_DIR')
+    json_maps_dir = Config.get('DIRECTORIES', 'INPUT_JSON_TEMPLATES')"""
+    dirs = {'outputs': 'Outputs', 'loaded': 'Loaded', 'noarmalized': 'Normalized', 'json_maps': 'Json_Maps'}
+    """
+    dirs['outputs'] = outputs_dir
+    dirs['loaded'] = loaded_dir
+    dirs['normalized'] = normalized_dir
+    dirs['json_maps'] = json_maps_dir"""
+
+    datetime_format = Config.get('NORMALIZE_FORMATS', 'datetime')
+    date_format = Config.get('NORMALIZE_FORMATS', 'date')
+    time_format = Config.get('NORMALIZE_FORMATS', 'time')
+    formats = {}
+    formats["datetime_format"] = datetime_format
+    formats["date_format"] = date_format
+    formats["time_format"] = time_format
+
+    arguments=sys.argv
+    input_file_or_dir = None
+    template_file_path = None
+    input_map_path = None
+    template_map_path = None
+    template_header_number = '1'
+
+    if(len(arguments)<3):
+        print("At least 2 arguments are required for the scripts to run successfully.")
+    else:
+        print("complete args...")
+        args_dictionary = parse_arguments(arguments)
+        input_file_or_dir = args_dictionary['input']
+        template_file_path = args_dictionary['template']
+        template_path = pathlib2.Path(template_file_path)
+        template_fname = template_path.name
+        template_fname_split = template_fname.split('.')
+        template_parent_dir = pathlib2.Path(template_path.parent)
+
+        outputs_dir = template_parent_dir.joinpath(dirs['outputs'])
+        normalized_dir = outputs_dir.joinpath(dirs['loaded'])
+        loaded_dir = outputs_dir.joinpath(dirs["normalized"])
+
+        if(not(outputs_dir.exists())):
+            os.mkdir(str(outputs_dir))
+        if(not(normalized_dir.exists())):
+            os.mkdir(str(normalized_dir))
+        if(not(loaded_dir.exists())):
+            os.mkdir(str(loaded_dir))
+
+        template_map_path = str(template_parent_dir.joinpath(template_fname_split[0] + '.json'))
+
+        if(args_dictionary['input_map']!=None):
+            input_map_path = args_dictionary['input_map']
+        if args_dictionary['template_header']!=None:
+            template_header_number = int(args_dictionary['template_header'])
+
+    spec_data = JSON_Template_Generator.get_fields(template_file_path, int(template_header_number))
+    JSON_Template_Generator.write_to_file(spec_data, template_map_path, template_header_number)
+    input_fpath = pathlib2.Path(input_file_or_dir)
+
+
+    if(input_fpath.exists()):
+        if(input_fpath.is_file()):
+            handle_file_input(input_file_or_dir, template_file_path, template_map_path, formats, input_map_path)
+        elif(input_fpath.is_dir()):
+            same_file_formats = False
+            file_fmt_response = None
+            while (file_fmt_response is None) or file_fmt_response == '':
+                file_fmt_response = raw_input("Do all the files in the directory have the same format (Y/N)?")
+                file_fmt_response = file_fmt_response.strip()
+            if(file_fmt_response.lower()[0]=='y'):
+                same_file_formats=True
+            handle_dir_input(input_file_or_dir, template_file_path, template_map_path, formats, dirs, same_file_formats,
+                             input_map_path)
+        else:
+            print("Invalid argument for input file, it is neither a directory or a file.")
+    return
+
+
+main()
 print("End of processing")

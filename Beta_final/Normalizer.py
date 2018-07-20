@@ -1,17 +1,34 @@
 import configparser, pandas as pd
 import datetime, json, openpyxl
-import DatetimeHandler, GeoHandler
+import DatetimeHandler, GeoHandler, pathlib2
 
+DEFAULT_DATETIME_FORMAT="%d-%m-%Y %I:%M:%S%p"
+DEFAULT_TIME_FORMAT="%I:%M:%S%p"
+DEFAULT_DATE_FORMAT="%d-%m-%Y"
 
 def datetime_work(row, formats):
     curr_dt_handler = DatetimeHandler.DatetimeHandler()
     if row["datetime"] != '':
         dt_time = row["datetime"]
-        curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, formats["datetime_format"])
+        try:
+            curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, formats["datetime_format"])
+        except Exception as e:
+            print("Provided format for reading datetime failed in normalizer, will use default format {}"
+                  .format(DEFAULT_DATETIME_FORMAT))
+            formats["datetime_format"]=DEFAULT_DATETIME_FORMAT
+            curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, DEFAULT_DATETIME_FORMAT)
+
     else:
         if row["date"] != '':
             dt = row["date"]
-            curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
+            try:
+                curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
+            except Exception as e:
+                print("Provided format for reading date failed in normalizer, will use default format {}".
+                      format(DEFAULT_DATE_FORMAT))
+                formats["datetime_format"] = DEFAULT_DATE_FORMAT
+                curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
+
         else:
             if row["day"] != '':
                 day = int(row["day"])
@@ -24,7 +41,14 @@ def datetime_work(row, formats):
                 curr_dt_handler.year = yr
         if row["time"] != '':
             t = row["time"]
-            curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+            try:
+                curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+            except Exception as e:
+                print("Provided format for reading time in normalizer, will use default format {}".
+                      format(DEFAULT_TIME_FORMAT))
+                formats["datetime_format"] = DEFAULT_TIME_FORMAT
+                curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+
         else:
             if row["hour"] != '':
                 hr = int(row["hour"])
@@ -78,6 +102,9 @@ def normalize(file_name, specs, formats):
 
 
 def writerows(filename, row_list, specs):
+    f_path = pathlib2.Path(filename)
+    fname = f_path.name
+
     workbook = openpyxl.load_workbook(filename)
     wk_sheet = workbook.active
     with open(specs) as the_specs:
@@ -88,8 +115,10 @@ def writerows(filename, row_list, specs):
             cell = template_specs["fields"][key]["column_letter"] + str(row)
             wk_sheet[cell] = value
         row += 1
-    workbook.save("_normalized-"+filename)
-    return
+    parent_dir = pathlib2.Path(f_path.parent)
+    save_path = str(parent_dir.joinpath('_normalized'+'-'+fname))
+    workbook.save(save_path)
+    return save_path
 
 
 def main():

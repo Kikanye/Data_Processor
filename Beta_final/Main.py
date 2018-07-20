@@ -7,14 +7,14 @@ def main():
     Config = configparser.ConfigParser()
     Config.read('Loader_Config.ini')
 
-    TEMPLATE_FILE = Config.get('FILES_INFO', 'TEMPLATE_NAME')
+    TEMPLATE_FILE = Config.get('TEMPLATE_INFO', 'TEMPLATE_PATH')
     template_name_split = TEMPLATE_FILE.split('.')
     TEMPLATE_SPEC = ''.join(template_name_split[0:len(template_name_split)-1])+'.json'
-    TEMPLATE_HEADER = Config.get('FILES_INFO', 'TEMPLATE_HEADER_ROW')
+    TEMPLATE_HEADER = Config.get('TEMPLATE_INFO', 'TEMPLATE_HEADER_ROW')
 
-    INPUT_FILE = Config.get('INPUT', 'I_FILE')
+    INPUT_FILE = Config.get('INPUT_INFO', 'INPUT_FILE_PATH')
     input_filename_split = INPUT_FILE.split('.')
-    INPUT_SPEC = Config.get('INPUT', 'I_MAP')
+    INPUT_SPEC = Config.get('INPUT_INFO', 'INPUT_FILE_MAP')
     if(INPUT_SPEC.strip()==''):
         INPUT_SPEC = ''.join(input_filename_split[0:len(input_filename_split)-1])+'_input_mappings.json'
 
