@@ -1,12 +1,17 @@
 import datetime
 import calendar
+import configparser
 
 
 # TODO: Edit all methods in this class so that they have meaningful return values.
 class DatetimeHandler:
-    process_date_format = "%d-%m-%Y"
-    process_time_format = "%I:%M:%S%p"
-    process_datetime_format = "%d-%m-%Y %I:%M:%S%p"
+    Config = configparser.ConfigParser()
+    Config.read("Formats_Settings.ini")
+
+    process_date_format = Config.get('NORMALIZE_FORMATS', 'date')
+    process_datetime_format = Config.get('NORMALIZE_FORMATS', 'datetime')
+    process_time_format = Config.get('NORMALIZE_FORMATS', 'time')
+
     SECONDS_IN_DAY = 24.0*60.0*60.0
     HOURS_TO_MIN = 60.0
     MINS_TO_SECS = 60.0

@@ -2,9 +2,12 @@ import configparser, pandas as pd
 import datetime, json, openpyxl
 import DatetimeHandler, GeoHandler, pathlib2
 
-DEFAULT_DATETIME_FORMAT="%d-%m-%Y %I:%M:%S%p"
-DEFAULT_TIME_FORMAT="%I:%M:%S%p"
-DEFAULT_DATE_FORMAT="%d-%m-%Y"
+Config = configparser.ConfigParser()
+Config.read("Formats_Settings.ini")
+
+DEFAULT_DATE_FORMAT = Config.get('DATALOADER_FORMATS', 'date')
+DEFAULT_DATETIME_FORMAT = Config.get('DATALOADER_FORMATS', 'datetime')
+DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
 
 def datetime_work(row, formats):
     curr_dt_handler = DatetimeHandler.DatetimeHandler()

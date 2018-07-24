@@ -7,6 +7,13 @@ import datetime
 import pandas as pd, numpy as np
 import pathlib2, shutil
 
+Config = configparser.ConfigParser()
+Config.read("Formats_Settings.ini")
+
+DEFAULT_DATE_FORMAT = Config.get('DATALOADER_FORMATS', 'date')
+DEFAULT_DATETIME_FORMAT = Config.get('DATALOADER_FORMATS', 'datetime')
+DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
+
 def handle_csv_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
@@ -23,19 +30,35 @@ def handle_csv_input(filename, input_specs):
     if ("date" in header_names):
         if ((formats_present)and formats.has_key("date")):
             date_format=formats["date"]
-            data["date"] = pd.to_datetime(data["date"], format=date_format)
+            try:
+                data["date"] = pd.to_datetime(data["date"], format=date_format)
+            except Exception as e:
+                print(e)
+                print("Failed to read in date using format {}\n Will try to infer the format".format(date_format))
+                data["date"] = pd.to_datetime(data["date"])
         else:
             data["date"] = pd.to_datetime(data["date"])
     if ("time" in header_names):
         if ((formats_present)and formats.has_key("time")):
             time_format = formats["time"]
-            data["time"] = pd.to_datetime(data["time"], format=time_format)
+            try:
+                data["time"] = pd.to_datetime(data["time"], format=time_format)
+            except Exception as e:
+                print(e)
+                print("Failed to read in time using format {}\n Will try to infer the format".format(time_format))
+                data["time"] = pd.to_datetime(data["time"])
         else:
             data["time"] = pd.to_datetime(data["time"])
     if ("datetime" in header_names):
         if ((formats_present)and formats.has_key("datetime")):
             datetime_format = formats["datetime"]
-            data["datetime"] = pd.to_datetime(data["datetime"], format=datetime_format)
+            try:
+                data["datetime"] = pd.to_datetime(data["datetime"], format=datetime_format)
+            except Exception as e:
+                print(e)
+                print("Failed to read in datetime using format {}\n Will try to infer the format"
+                      .format(datetime_format))
+                data["datetime"] = pd.to_datetime(data["datetime"])
         else:
             data["datetime"] = pd.to_datetime(data["datetime"])
     data=data.where(pd.notnull(data), None)
@@ -57,31 +80,48 @@ def handle_xlsx_input(filename, input_specs):
             formats_present = True
 
         if ("date" in header_names):
-            if ((formats_present) and formats.has_key("date")):
-                if (not ((d_frames["date"].dtype == datetime.date) or (d_frames["date"].dtype == datetime.datetime))):
+            if (not ((d_frames["date"].dtype == datetime.date) or (d_frames["date"].dtype == datetime.datetime))):
+                if ((formats_present) and formats.has_key("date")):
                     date_format = formats["date"]
-                    d_frames["date"] = pd.to_datetime(d_frames["date"], format=date_format)
+                    try:
+                        d_frames["date"] = pd.to_datetime(d_frames["date"], format=date_format)
+                    except Exception as e:
+                        print(e)
+                        print("Failed to read in date using the format {}\n Will try to infer the format."
+                              .format(date_format))
+                        d_frames["date"] = pd.to_datetime(d_frames["date"])
             else:
-                if (not ((d_frames["date"].dtype == datetime.date) or (d_frames["date"].dtype == datetime.datetime))):
                     d_frames["date"] = pd.to_datetime(d_frames["date"])
 
         if ("time" in header_names):
-            if ((formats_present) and formats.has_key("time")):
-                if (not ((d_frames["time"].dtype == datetime.time) or (d_frames["time"].dtype == datetime.datetime))):
+            if (not ((d_frames["time"].dtype == datetime.time) or (d_frames["time"].dtype == datetime.datetime))):
+                if ((formats_present) and formats.has_key("time")):
                     time_format = formats["time"]
-                    d_frames["time"] = pd.to_datetime(d_frames["time"], format=time_format)
+                    try:
+                        d_frames["time"] = pd.to_datetime(d_frames["time"], format=time_format)
+                    except Exception as e:
+                        print(e)
+                        print("Failed to read in the time using the format {}\n Will try to infer the format."
+                              .format(time_format))
+                        d_frames["time"] = pd.to_datetime(d_frames["time"])
             else:
-                if (not ((d_frames["time"].dtype == datetime.time) or (d_frames["time"].dtype == datetime.datetime))):
                     d_frames["time"] = pd.to_datetime(d_frames["time"])
 
         if ("datetime" in header_names):
-            if ((formats_present) and formats.has_key("datetime")):
-                if (not (d_frames["datetime"].dtype == datetime.datetime)):
+            if (not (d_frames["datetime"].dtype == datetime.datetime)):
+                if ((formats_present) and formats.has_key("datetime")):
                     datetime_format = formats["datetime"]
-                    d_frames["datetime"] = pd.to_datetime(d_frames["datetime"], format=datetime_format)
+                    try:
+                        d_frames["datetime"] = pd.to_datetime(d_frames["datetime"], format=datetime_format)
+                    except Exception as e:
+                        print(e)
+                        print("Failed to read in the datetime using the format {}\n Will try to infer the format."
+                              .format(datetime_format))
+                        d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
             else:
-                if (not (d_frames["datetime"].dtype == datetime.datetime)):
                     d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
+
+    d_frames = d_frames.where(pd.notnull(d_frames), None)
     data_list = d_frames.to_dict('records')
     return data_list
 
@@ -91,32 +131,35 @@ def get_input(filename, input_map):
     the_path=pathlib2.Path(filename)
     fname = the_path.name
     filename_split = fname.split('.')
+
     input_list=[]
     if filename_split[-1] == 'csv':
         input_list=handle_csv_input(filename, input_map)
     elif filename_split[-1] == 'xls' or filename_split[-1] == 'xlsx':
         input_list=handle_xlsx_input(filename, input_map)
     else:
-        raise Exception("Invalid file type, must be '.csv' or '.xlsx' ")
+        print("Invalid file type, must be '.csv' or '.xlsx' ")
+
     return input_list
 
 
 def process_input(list_of_rows, output_template):
+    # TODO: Find someway to not use literals when comparing keys
     out_list=[]
     with open(output_template) as j_temp_specs:
         template_specs = json.load(j_temp_specs)
     row_template = template_specs["row_template"]
     count=0
     for dictionary in list_of_rows:
-        count+=1
+        count += 1
         curr_row = row_template.copy()
         for key, value in dictionary.items():
             if "date" == key and (value is not pd.NaT) and (value is not None):
-                value=value.strftime("%d-%m-%Y")
+                value=value.strftime(DEFAULT_DATE_FORMAT)
             elif "time" == key and (value is not pd.NaT) and (value is not None):
-                value=value.strftime("%I:%M:%S%p")
+                value=value.strftime(DEFAULT_TIME_FORMAT)
             elif "datetime" == key and (value is not pd.NaT) and (value is not None):
-                value=value.strftime("%d-%m-%Y %I:%M:%S%p")
+                value=value.strftime(DEFAULT_DATETIME_FORMAT)
             curr_row[key] = value
         out_list.append(curr_row)
     return out_list
@@ -156,15 +199,15 @@ def load_output(dictionary_list, filename, in_filename, output_specs):
     the_path = pathlib2.Path(filename)
     fname = the_path.name
     filename_split = fname.split('.')
-    #filename_split = filename.split('.')
     if(filename_split[-1]=='xlsx'):
         return_val=handle_xlsx_output(filename, dictionary_list, in_filename, output_specs)
     return return_val
 
 
-def transfer_values(inputfile, outputfile, mappings_file, template_json, output_directory):
+def transfer_values(inputfile, outputfile, mappings_file, template_json):
     """This function will move the values in inputfile to outputfile accurately, based on the mappings_file and
        template_json specifications."""
+
     input_rows = get_input(inputfile, mappings_file)
     output_rows = process_input(input_rows, template_json)
     saved_path = load_output(output_rows, outputfile, inputfile, template_json)

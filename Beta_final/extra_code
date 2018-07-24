@@ -1,0 +1,52 @@
+    for item in header_name_list:
+        seek_format = False
+        if(item=='date' or item=='datetime' or item=='time'):
+            seek_format = True
+        correct_input = False
+        while (not(correct_input)):
+            col = raw_input("\nWhich column contains the "+item+"? (Use number or excel column letter)\n Enter "+
+                            "RESET to restart your entry, (maybe due to errors)")
+            col = col.strip()
+            if(col.isdigit()):
+                print("Column number entered.")
+                correct_input = True
+                return_dict["mappings"][item] = int(col)
+                #return_dict["header_list"].append(item)
+                if(seek_format):
+                    valid_format = False
+                    while(not(valid_format)):
+                        fmt = raw_input("Enter the format for "+item+" (using Python datetime style.)")
+                        fmt.strip()
+                        if(fmt==''):
+                            valid_format = True
+                            print("No format supplied, will try to infer format.")
+                        elif('%' in fmt):
+                            valid_format=True
+                            return_dict['formats'][item] = fmt.strip()
+                        else:
+                            print("Invalid format entered.")
+            elif(col.isalpha()):
+
+                print("Column letter entered.")
+                correct_input = True
+                col_num = openpyxl.utils.column_index_from_string(col)
+                return_dict["mappings"][item] = col_num
+                #return_dict["header_list"].append(item)
+                if(seek_format):
+                    valid_format = False
+                    while(not(valid_format)):
+                        fmt = raw_input("Enter the format for "+item+" (using Python datetime style.)")
+                        fmt.strip()
+                        if(fmt==''):
+                            valid_format = True
+                            print("No format supplied, will try to infer format.")
+                        elif('%' in fmt):
+                            valid_format=True
+                            return_dict['formats'][item] = fmt.strip()
+                        else:
+                            print("Invalid format entered.")
+            elif col == '':
+                print("No column entered, meaning field is not present")
+                correct_input = True
+            else:
+                print("Invalid entry please enter either a valid number for the column of the excel style column")
