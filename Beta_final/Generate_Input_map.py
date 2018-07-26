@@ -75,7 +75,7 @@ def handle_headerlist(header_name_list):
         column = item_info["column"]
         fmt = item_info["format"]
 
-        if column == -1:
+        if column != -1:
             std_dict["mappings"][item] = column
         if fmt != '':
             std_dict['formats'][item] = fmt

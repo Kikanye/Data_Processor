@@ -8,6 +8,8 @@ import configparser
 
 
 def parse_arguments(arguments):
+    """This function will take in one parameter which is a list of values passed in from the command line,
+    It returns a dictionary of containing all the arguments with appropriate keys."""
     arg_dict = {'input': None,'template': None, 'input_map': None, 'template_header': None}
     if ('=' in arguments[1] or '=' in arguments[2]):
         raise Exception("Invalid character found in first and/or second argument,\n"
@@ -17,7 +19,7 @@ def parse_arguments(arguments):
         arg_dict['template'] = arguments[2].strip()
     for arg in arguments[3:]:
         if('=' not in arg):
-            raise Exception("Invalid argument supplied, all arguments except the first and the second must be in the form,"
+            print("Invalid argument supplied, all arguments except the first and the second must be in the form,"
                   " field=value")
             exit(1)
         arg_split = arg.split('=')
@@ -30,7 +32,8 @@ def parse_arguments(arguments):
 
 def handle_file_input(input_file, template_path, template_map_path, formats, directories, input_map_path=None,
                       move_ip_map=True):
-    # TODO: Implement algorithm to handle file as input
+    """This function loads a file specified into the specified template. It can use an input_map_path passed in,
+     and if not is will generate an input map, by asking u """
     if(input_map_path==None or input_map_path==''):
         input_path = pathlib2.Path(input_file)
         input_fname = input_path.name
@@ -109,7 +112,7 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
                 json.dump(data, data_file, indent=2)
 
         for file in files_list:
-            handle_file_input(file, template_path, template_map_path, formats, input_map_path, move_ip_map=False)
+                handle_file_input(file, template_path, template_map_path, formats, input_map_path, move_ip_map=False)
         ip_map = pathlib2.Path(input_map_path)
         ip_parent = ip_map.parent
         json_templates_path = ip_parent.joinpath(directories['json_maps'])

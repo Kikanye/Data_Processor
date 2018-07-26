@@ -13,12 +13,26 @@ Config.read("Formats_Settings.ini")
 DEFAULT_DATE_FORMAT = Config.get('DATALOADER_FORMATS', 'date')
 DEFAULT_DATETIME_FORMAT = Config.get('DATALOADER_FORMATS', 'datetime')
 DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
+DEFAULT_UNKNOWN='UNKNOWN-'
 
 def handle_csv_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
-    header_names = test_dict["header_list"]
-    data = pd.read_csv(filename, header=None, names=header_names, skiprows=int(test_dict['header_row']))
+    #header_names = test_dict["header_list"]
+    #data = pd.read_csv(filename, header=None, names=header_names, skiprows=int(test_dict['header_row']))
+
+    data = pd.read_csv(filename, sheet_name=None)
+    rows, cols = data.shape
+    header_names = [DEFAULT_UNKNOWN]*cols
+
+    count = 0
+    for item in header_names:
+        header_names[count] = item+str(count)
+        count += 1
+    for key, value in test_dict['mappings'].items():
+        header_names[int(value)-1] = key
+    data.columns = header_names
+
     formats={}
     formats_present=False
     if(test_dict.has_key("formats")):
@@ -69,10 +83,21 @@ def handle_csv_input(filename, input_specs):
 def handle_xlsx_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
-    header_names = test_dict["header_list"]
-    d_frames = pd.read_excel(filename, header=None, names=header_names, sheet_name=None,
-                             skiprows=int(test_dict['header_row']))
-    formats = {}
+    #header_names = test_dict["header_list"]
+    #d_frames = pd.read_excel(filename, header=None, names=header_names, sheet_name=None,
+                             #skiprows=int(test_dict['header_row']))
+    d_frames = pd.read_excel(filename, sheet_name=None)
+    rows, cols = d_frames.shape
+    header_names = [DEFAULT_UNKNOWN]*cols
+
+    count = 0
+    for item in header_names:
+        header_names[count] = item+str(count)
+        count += 1
+    for key, value in test_dict['mappings'].items():
+        header_names[int(value)-1] = key
+    d_frames.columns = header_names
+
     formats_present = False
     if (test_dict.has_key("formats")):
         formats = test_dict["formats"]
@@ -90,8 +115,8 @@ def handle_xlsx_input(filename, input_specs):
                         print("Failed to read in date using the format {}\n Will try to infer the format."
                               .format(date_format))
                         d_frames["date"] = pd.to_datetime(d_frames["date"])
-            else:
-                    d_frames["date"] = pd.to_datetime(d_frames["date"])
+                else:
+                        d_frames["date"] = pd.to_datetime(d_frames["date"])
 
         if ("time" in header_names):
             if (not ((d_frames["time"].dtype == datetime.time) or (d_frames["time"].dtype == datetime.datetime))):
@@ -104,8 +129,8 @@ def handle_xlsx_input(filename, input_specs):
                         print("Failed to read in the time using the format {}\n Will try to infer the format."
                               .format(time_format))
                         d_frames["time"] = pd.to_datetime(d_frames["time"])
-            else:
-                    d_frames["time"] = pd.to_datetime(d_frames["time"])
+                else:
+                        d_frames["time"] = pd.to_datetime(d_frames["time"])
 
         if ("datetime" in header_names):
             if (not (d_frames["datetime"].dtype == datetime.datetime)):
@@ -118,8 +143,8 @@ def handle_xlsx_input(filename, input_specs):
                         print("Failed to read in the datetime using the format {}\n Will try to infer the format."
                               .format(datetime_format))
                         d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
-            else:
-                    d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
+                else:
+                        d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
 
     d_frames = d_frames.where(pd.notnull(d_frames), None)
     data_list = d_frames.to_dict('records')
@@ -154,13 +179,16 @@ def process_input(list_of_rows, output_template):
         count += 1
         curr_row = row_template.copy()
         for key, value in dictionary.items():
-            if "date" == key and (value is not pd.NaT) and (value is not None):
-                value=value.strftime(DEFAULT_DATE_FORMAT)
-            elif "time" == key and (value is not pd.NaT) and (value is not None):
-                value=value.strftime(DEFAULT_TIME_FORMAT)
-            elif "datetime" == key and (value is not pd.NaT) and (value is not None):
-                value=value.strftime(DEFAULT_DATETIME_FORMAT)
-            curr_row[key] = value
+            if(not(DEFAULT_UNKNOWN in key)):
+                if "date" == key and (value is not pd.NaT) and (value is not None):
+                    value=value.strftime(DEFAULT_DATE_FORMAT)
+                elif "time" == key and (value is not pd.NaT) and (value is not None):
+                    value=value.strftime(DEFAULT_TIME_FORMAT)
+                elif "datetime" == key and (value is not pd.NaT) and (value is not None):
+                    value=value.strftime(DEFAULT_DATETIME_FORMAT)
+                curr_row[key] = value
+            else:
+                del dictionary[key]
         out_list.append(curr_row)
     return out_list
 
