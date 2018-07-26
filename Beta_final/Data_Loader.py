@@ -21,7 +21,7 @@ def handle_csv_input(filename, input_specs):
     #header_names = test_dict["header_list"]
     #data = pd.read_csv(filename, header=None, names=header_names, skiprows=int(test_dict['header_row']))
 
-    data = pd.read_csv(filename, sheet_name=None)
+    data = pd.read_csv(filename)
     rows, cols = data.shape
     header_names = [DEFAULT_UNKNOWN]*cols
 

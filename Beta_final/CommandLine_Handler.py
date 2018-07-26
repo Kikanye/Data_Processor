@@ -112,7 +112,9 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
                 json.dump(data, data_file, indent=2)
 
         for file in files_list:
-                handle_file_input(file, template_path, template_map_path, formats, input_map_path, move_ip_map=False)
+                handle_file_input(file, template_path, template_map_path, formats, directories=directories,
+                                  input_map_path=input_map_path,
+                                  move_ip_map=False)
         ip_map = pathlib2.Path(input_map_path)
         ip_parent = ip_map.parent
         json_templates_path = ip_parent.joinpath(directories['json_maps'])
@@ -209,6 +211,7 @@ def main():
                 file_fmt_response = raw_input("Do all the files in the directory have the same format (Y/N)?")
                 file_fmt_response = file_fmt_response.strip()
             if(file_fmt_response.lower()[0]=='y'):
+                print("The same input map will me used to load all the files since they are of the same format.")
                 same_file_formats=True
             handle_dir_input(input_file_or_dir, template_file_path, template_map_path, formats, dirs, same_file_formats,
                              input_map_path)
