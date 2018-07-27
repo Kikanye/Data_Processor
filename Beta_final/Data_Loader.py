@@ -1,11 +1,11 @@
 """This script will get data from a specified spreadsheet and load it into a specified output sheet.
    This script will use a .ini file which will have """
 import csv
-import openpyxl, configparser, datetime
+import openpyxl, configparser
 import json
 import datetime
-import pandas as pd, numpy as np
-import pathlib2, shutil
+import pandas as pd
+import pathlib2
 
 Config = configparser.ConfigParser()
 Config.read("Formats_Settings.ini")
@@ -13,13 +13,11 @@ Config.read("Formats_Settings.ini")
 DEFAULT_DATE_FORMAT = Config.get('DATALOADER_FORMATS', 'date')
 DEFAULT_DATETIME_FORMAT = Config.get('DATALOADER_FORMATS', 'datetime')
 DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
-DEFAULT_UNKNOWN='UNKNOWN-'
+DEFAULT_UNKNOWN = 'UNKNOWN-'
 
 def handle_csv_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
-    #header_names = test_dict["header_list"]
-    #data = pd.read_csv(filename, header=None, names=header_names, skiprows=int(test_dict['header_row']))
 
     data = pd.read_csv(filename)
     rows, cols = data.shape
@@ -83,9 +81,7 @@ def handle_csv_input(filename, input_specs):
 def handle_xlsx_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
-    #header_names = test_dict["header_list"]
-    #d_frames = pd.read_excel(filename, header=None, names=header_names, sheet_name=None,
-                             #skiprows=int(test_dict['header_row']))
+
     d_frames = pd.read_excel(filename, sheet_name=None)
     rows, cols = d_frames.shape
     header_names = [DEFAULT_UNKNOWN]*cols

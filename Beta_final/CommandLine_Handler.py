@@ -5,6 +5,7 @@ import pathlib2
 import json
 import JSON_Template_Generator, Data_Loader, Normalizer, Generate_Input_map
 import configparser
+import traceback
 
 
 def parse_arguments(arguments):
@@ -34,7 +35,9 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
                       move_ip_map=True):
     """This function loads a file specified into the specified template. It can use an input_map_path passed in,
      and if not is will generate an input map, by asking u """
-    if(input_map_path==None or input_map_path==''):
+
+    # If the input map file was not provided, then ask questions to generate it.
+    if (input_map_path==None or input_map_path==''):
         input_path = pathlib2.Path(input_file)
         input_fname = input_path.name
         input_fname_split = input_fname.split('.')
@@ -45,14 +48,16 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
         with open(input_map_path, "w") as data_file:
             json.dump(data, data_file, indent=2)
 
+    # Load the template with the data from the input file and normalize it.
     loaded_data_path = Data_Loader.transfer_values(input_file, template_path, input_map_path, template_map_path)
     row_list = Normalizer.normalize(loaded_data_path, template_map_path, formats)
     normalized_path = Normalizer.writerows(loaded_data_path, row_list, template_map_path)
 
+    # Move the processing files into the right directories
     loaded_data_path_obj = pathlib2.Path(loaded_data_path)
     loaded_data_parent = loaded_data_path_obj.parent
     loaded_data_destination =(loaded_data_parent.joinpath(directories["outputs"])).joinpath(directories['loaded'])
-    if((loaded_data_destination.joinpath(loaded_data_path_obj.name)).exists()):
+    if ((loaded_data_destination.joinpath(loaded_data_path_obj.name)).exists()):
         print("A file with name {} already exists in the destination path provided to move."
               .format(loaded_data_path_obj.name))
         response=raw_input("Would you like to replace the file with the newly processed one? (Y/N)")
@@ -76,6 +81,7 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
     else:
         shutil.move(normalized_path, str(normalized_data_destination))
 
+    # If the input map file is to be moved (all files are not he same format), then do so.
     if move_ip_map:
         ip_map = pathlib2.Path(input_map_path)
         ip_parent = ip_map.parent
@@ -95,13 +101,20 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
 
 def handle_dir_input(dir_path, template_path, template_map_path, formats, directories, same_file_formats,
                      input_map_path=None):
-    # TODO: Implement algorithm to handle directory as input
-    files_list=[]
+    """This function takes in a directory and loads all the files in that directory into the specified template."""
+
+    # Get all the names of the files to be loaded and put them into a list.
+    files_list = []
     dir_path_object = pathlib2.Path(dir_path)
     for item in dir_path_object.iterdir():
-        files_list.append(str(item))
+        item_split = item.split('.')
+        extension = item_split[-1]
+        if extension == 'csv' or extension == 'xlsx' or extension == 'xls':
+            files_list.append(str(item))
 
-    if(same_file_formats):
+    # Do this if all the files in the directory have the same format.
+    if (same_file_formats):
+        # Check to see if the input file map was provided, if not ask questions to generate it.
         if(input_map_path==None or input_map_path==''):
             input_path = pathlib2.Path(files_list[0])
             parent_dir = pathlib2.Path(input_path.parent)
@@ -111,10 +124,18 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
             with open(input_map_path, "w") as data_file:
                 json.dump(data, data_file, indent=2)
 
+        # Process each file in the list
         for file in files_list:
+            try:
                 handle_file_input(file, template_path, template_map_path, formats, directories=directories,
                                   input_map_path=input_map_path,
                                   move_ip_map=False)
+            except Exception as e:
+                print("Processing {} failed".format(file))
+                print(e)
+                traceback.print_exc()
+
+        # Move the files into the right directories after processing.
         ip_map = pathlib2.Path(input_map_path)
         ip_parent = ip_map.parent
         json_templates_path = ip_parent.joinpath(directories['json_maps'])
@@ -129,15 +150,20 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
             shutil.move(str(ip_map), str(json_templates_path))
 
     else:
+        # If the files to be loaded are not all in the same format, load them this way
         for file in files_list:
             print("Fill in data location information for {}".format(pathlib2.Path(file).name))
-            handle_file_input(file, template_path, template_map_path, formats, directories)
+            try:
+                handle_file_input(file, template_path, template_map_path, formats, directories)
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
     return
 
 
 def main():
     Config = configparser.ConfigParser()
-    Config.read('CommandLine_Config.ini')
+    Config.read('Formats_Settings.ini')
 
     dirs = {'outputs': 'Outputs', 'loaded': 'Loaded', 'normalized': 'Normalized', 'json_maps': 'Json_Maps'}
 
@@ -154,13 +180,15 @@ def main():
     input_file_or_dir = None
     template_file_path = None
     input_map_path = None
-    template_map_path = None
+    template_json_map_path = None
     template_header_number = '1'
 
+    # Get and parse arguments, exit if the number of arguments are incomplete
     if(len(arguments)<3):
         print("At least 2 arguments are required for the scripts to run successfully.")
+        exit(-1)
     else:
-        print("complete args...")
+        print("Complete args...")
         args_dictionary = parse_arguments(arguments)
         input_file_or_dir = args_dictionary['input']
         template_file_path = args_dictionary['template']
@@ -169,40 +197,48 @@ def main():
         template_fname_split = template_fname.split('.')
         template_parent_dir = pathlib2.Path(template_path.parent)
 
+        # Get the names of the directories to put the output files into.
         outputs_dir = template_parent_dir.joinpath(dirs['outputs'])
         normalized_dir = outputs_dir.joinpath(dirs['loaded'])
         loaded_dir = outputs_dir.joinpath(dirs["normalized"])
 
-
-        if(not(outputs_dir.exists())):
+        # Check to see if the directories that will contain the auto generated files exist already, if not create them.
+        if (not(outputs_dir.exists())):
             os.mkdir(str(outputs_dir))
-        if(not(normalized_dir.exists())):
+        if (not(normalized_dir.exists())):
             os.mkdir(str(normalized_dir))
-        if(not(loaded_dir.exists())):
+        if (not(loaded_dir.exists())):
             os.mkdir(str(loaded_dir))
 
+        # Create the filename string for the Json map that will be used for the template file
+        template_json_map_path = str(template_parent_dir.joinpath(template_fname_split[0] + '.json'))
 
-        template_map_path = str(template_parent_dir.joinpath(template_fname_split[0] + '.json'))
-
-        if(args_dictionary['input_map']!=None):
+        if (args_dictionary['input_map']!=None):
             input_map_path = args_dictionary['input_map']
-        if args_dictionary['template_header']!=None:
+        if (args_dictionary['template_header']!=None):
             template_header_number = int(args_dictionary['template_header'])
 
-    spec_data = JSON_Template_Generator.get_fields(template_file_path, int(template_header_number))
-    JSON_Template_Generator.write_to_file(spec_data, template_map_path, template_header_number)
-    input_fpath = pathlib2.Path(input_file_or_dir)
+    # Call functions from the JSON Template Generator to create the JSON_Template map
+    spec_data = JSON_Template_Generator.get_fields(template_file_path, template_header_number)
+    JSON_Template_Generator.write_to_file(spec_data, template_json_map_path, template_header_number)
 
-
-    if(input_fpath.exists()):
-        if(input_fpath.is_file()):
-            input_dir_obj = input_fpath.parent
+    # Create path object for the input data,call methods to process and load the data into the templates
+    input_data_path = pathlib2.Path(input_file_or_dir)
+    if (input_data_path.exists()):
+        if (input_data_path.is_file()):
+            input_dir_obj = input_data_path.parent
             json_maps_dir = input_dir_obj.joinpath(dirs["json_maps"])
             if (not (json_maps_dir.exists())):
                 os.mkdir(str(json_maps_dir))
-            handle_file_input(input_file_or_dir, template_file_path, template_map_path, formats, input_map_path)
-        elif(input_fpath.is_dir()):
-            json_maps_dir = input_fpath.joinpath(dirs["json_maps"])
+            try:
+                handle_file_input(input_file_or_dir, template_file_path, template_json_map_path, formats, dirs,
+                              input_map_path=input_map_path)
+            except Exception as e:
+                print("Failed to process {}".format(input_file_or_dir))
+                print(e)
+                traceback.print_exc()
+        elif(input_data_path.is_dir()):
+            json_maps_dir = input_data_path.joinpath(dirs["json_maps"])
             if (not (json_maps_dir.exists())):
                 os.mkdir(str(json_maps_dir))
             same_file_formats = False
@@ -211,10 +247,15 @@ def main():
                 file_fmt_response = raw_input("Do all the files in the directory have the same format (Y/N)?")
                 file_fmt_response = file_fmt_response.strip()
             if(file_fmt_response.lower()[0]=='y'):
-                print("The same input map will me used to load all the files since they are of the same format.")
-                same_file_formats=True
-            handle_dir_input(input_file_or_dir, template_file_path, template_map_path, formats, dirs, same_file_formats,
-                             input_map_path)
+                print("The same input map will be used to load all the files since they are of the same format.")
+                same_file_formats = True
+            try:
+                handle_dir_input(input_file_or_dir, template_file_path, template_json_map_path, formats, dirs,
+                             same_file_formats, input_map_path)
+            except Exception as e:
+                print("Failed to process {}".format(input_file_or_dir))
+                print(e)
+                traceback.print_exc()
         else:
             print("Invalid argument for input file, it is neither a directory or a file.")
     return
