@@ -28,7 +28,11 @@ def handle_csv_input(filename, input_specs):
         header_names[count] = item+str(count)
         count += 1
     for key, value in test_dict['mappings'].items():
-        header_names[int(value)-1] = key
+        if(value>cols):
+            print(" The field {} was specified to be at {}, but this is out of the range in the input file.".
+                  format(key, value))
+        else:
+            header_names[int(value)-1] = key
     data.columns = header_names
 
     formats={}
@@ -251,9 +255,4 @@ def main():
     transfer_values(INPUT_FILE, OUTPUT_FILE, INPUT_SPEC, OUT_SPEC)
     print("End of Processing")
     return
-
-
-#print("Loading data into template.")
-#main()
-#print("Data loading into template complete.")
 

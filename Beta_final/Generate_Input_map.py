@@ -83,7 +83,7 @@ def handle_headerlist(header_name_list):
     return std_dict
 
 
-def generate_sample_input_map(json_template):
+def generate_input_map(json_template):
     """This function takes in the json template for the template file,
     and generates a JSON input map for the input file by asking the user questions."""
     return_dict = {"mappings":{}, "header_row":1, "header_list":[], "formats":{}}
@@ -112,7 +112,7 @@ def main():
     Config.read('Loader_Config.ini')
     TEMPLATE_FILE = Config.get('TEMPLATE_INFO', 'TEMPLATE_PATH')
     SPEC_FILE = Config.get('TEMPLATE_INFO', 'TEMPLATE_MAP_PATH')
-    data = generate_sample_input_map(TEMPLATE_FILE)
+    data = generate_input_map(TEMPLATE_FILE)
 
     with open(SPEC_FILE, "w") as data_file:
         json.dump(data, data_file, indent=2)

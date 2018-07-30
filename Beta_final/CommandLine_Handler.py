@@ -43,7 +43,7 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
         input_fname_split = input_fname.split('.')
         parent_dir = pathlib2.Path(input_path.parent)
         input_map_path = str(parent_dir.joinpath(input_fname_split[0]+'_input_mappings.json'))
-        data = Generate_Input_map.generate_sample_input_map(template_map_path)
+        data = Generate_Input_map.generate_input_map(template_map_path)
 
         with open(input_map_path, "w") as data_file:
             json.dump(data, data_file, indent=2)
@@ -119,7 +119,7 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
             input_path = pathlib2.Path(files_list[0])
             parent_dir = pathlib2.Path(input_path.parent)
             input_map_path = str(parent_dir.joinpath('_input_mappings.json'))
-            data = Generate_Input_map.generate_sample_input_map(template_map_path)
+            data = Generate_Input_map.generate_input_map(template_map_path)
 
             with open(input_map_path, "w") as data_file:
                 json.dump(data, data_file, indent=2)
@@ -226,6 +226,13 @@ def main():
     input_data_path = pathlib2.Path(input_file_or_dir)
     if (input_data_path.exists()):
         if (input_data_path.is_file()):
+            input_fname=input_data_path.name
+            input_fname_split=input_fname.split('.')
+            extension=input_fname_split[-1]
+
+            if not((extension == 'csv') or (extension == 'xlsx') or (extension == 'xls')):
+                print("Input file must be a csv, xlsx or xls file.")
+                exit(-1)
             input_dir_obj = input_data_path.parent
             json_maps_dir = input_dir_obj.joinpath(dirs["json_maps"])
             if (not (json_maps_dir.exists())):

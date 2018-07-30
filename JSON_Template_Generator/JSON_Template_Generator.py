@@ -106,6 +106,12 @@ def get_fields(filename, header_row=None):
         exit(1)
     return data
 
+def write_to_file(data, filename, header_row):
+    data["header_row"] = header_row
+    with open(filename, 'w') as write_file:
+        json.dump(data, write_file, indent=4)
+
+    return
 
 def main():
     """This function opens the .ini file with the specifications and then generates the json template for the file."""
@@ -117,13 +123,16 @@ def main():
     template_header=Config.get('FILES_INFO', 'HEADER_ROW')
     spec_file=Config.get('FILES_INFO', 'SPEC_FILE')
     spec_data=get_fields(template_file, template_header)
-    spec_data["header_row"]=template_header
 
-    with open(spec_file, 'w') as write_file:
-        json.dump(spec_data, write_file, indent=4)
+    write_to_file(spec_data, spec_file, template_header)
+    #spec_data["header_row"]=template_header
+
+    #with open(spec_file, 'w') as write_file:
+     #   json.dump(spec_data, write_file, indent=4)
     return
 
 
-print("Generating JSON file for template...")
-main()
-print("JSON file for Template Generated...")
+#print("Generating JSON file for template...")
+#main()
+#print("JSON file for Template Generated...")
+
