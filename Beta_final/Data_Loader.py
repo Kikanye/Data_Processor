@@ -55,6 +55,9 @@ def handle_csv_input(filename, input_specs):
         else:
             data["date"] = pd.to_datetime(data["date"])
     if ("time" in header_names):
+        do_ampm = False
+        if 'am/pm' in header_names:
+            do_ampm = True
         if ((formats_present)and formats.has_key("time")):
             time_format = formats["time"]
             try:
@@ -65,6 +68,18 @@ def handle_csv_input(filename, input_specs):
                 data["time"] = pd.to_datetime(data["time"])
         else:
             data["time"] = pd.to_datetime(data["time"])
+        if do_ampm:
+            time_list = data['time'].tolist()
+            ampm_list = data['am/pm'].tolist()
+            curr_index = 0
+            for item in time_list:
+                pos = curr_index
+                if (str(ampm_list[pos]).lower()).strip() == 'pm':
+                    print("Time {} at position {} is pm".format(item, pos))
+                    time_list[pos] = time_list[pos] + datetime.timedelta(hours=12)
+                curr_index += 1
+            time_series = pd.Series(time_list)
+            data['time'] = time_series
     if ("datetime" in header_names):
         if ((formats_present)and formats.has_key("datetime")):
             datetime_format = formats["datetime"]

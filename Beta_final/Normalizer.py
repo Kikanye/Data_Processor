@@ -11,58 +11,68 @@ DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
 
 def datetime_work(row, formats):
     curr_dt_handler = DatetimeHandler.DatetimeHandler()
-    if row["datetime"] != '':
-        dt_time = row["datetime"]
-        try:
-            curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, formats["datetime_format"])
-        except Exception as e:
-            print("Provided format for reading datetime failed in normalizer, will use default format {}"
-                  .format(DEFAULT_DATETIME_FORMAT))
-            formats["datetime_format"]=DEFAULT_DATETIME_FORMAT
-            curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, DEFAULT_DATETIME_FORMAT)
+    if "datetime" in row:
+        if row["datetime"] != '':
+            dt_time = row["datetime"]
+            try:
+                curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, formats["datetime_format"])
+            except Exception as e:
+                print("Provided format for reading datetime failed in normalizer, will use default format {}"
+                      .format(DEFAULT_DATETIME_FORMAT))
+                formats["datetime_format"]=DEFAULT_DATETIME_FORMAT
+                curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, DEFAULT_DATETIME_FORMAT)
 
     else:
-        if row["date"] != '':
-            dt = row["date"]
-            try:
-                curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
-            except Exception as e:
-                print("Provided format for reading date failed in normalizer, will use default format {}".
-                      format(DEFAULT_DATE_FORMAT))
-                formats["datetime_format"] = DEFAULT_DATE_FORMAT
-                curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
+        if "date" in row:
+            if row["date"] != '':
+                dt = row["date"]
+                try:
+                    curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
+                except Exception as e:
+                    print("Provided format for reading date failed in normalizer, will use default format {}".
+                          format(DEFAULT_DATE_FORMAT))
+                    formats["datetime_format"] = DEFAULT_DATE_FORMAT
+                    curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
 
         else:
-            if row["day"] != '':
-                day = int(row["day"])
-                curr_dt_handler.day = day
-            if row["month"] != '':
-                month = int(row["month"])
-                curr_dt_handler.month = month
-            if row["year"] != '':
-                yr = int(row["year"])
-                curr_dt_handler.year = yr
-        if row["time"] != '':
-            t = row["time"]
-            try:
-                curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
-            except Exception as e:
-                print("Provided format for reading time in normalizer, will use default format {}".
-                      format(DEFAULT_TIME_FORMAT))
-                formats["datetime_format"] = DEFAULT_TIME_FORMAT
-                curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+            if "day" in row:
+                if row["day"] != '':
+                    day = int(row["day"])
+                    curr_dt_handler.day = day
+            if "month" in row:
+                if row["month"] != '':
+                    month = int(row["month"])
+                    curr_dt_handler.month = month
+            if "year" in row:
+                if row["year"] != '':
+                    yr = int(row["year"])
+                    curr_dt_handler.year = yr
+        if "time" in row:
+            if row["time"] != '':
+                t = row["time"]
+                try:
+                    curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+                except Exception as e:
+                    print("Provided format for reading time in normalizer, will use default format {}".
+                          format(DEFAULT_TIME_FORMAT))
+                    formats["datetime_format"] = DEFAULT_TIME_FORMAT
+                    curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+
 
         else:
-            if row["hour"] != '':
-                hr = int(row["hour"])
-                curr_dt_handler.hour = hr
-            if row["minute"] != '':
-                minute_val = float(row["minute"])
-                minute_val = int(minute_val)
-                curr_dt_handler.minute = minute_val
-            if row["seconds"] != '':
-                secs = int(row["seconds"])
-                curr_dt_handler.seconds = secs
+            if "hour" in row:
+                if row["hour"] != '':
+                    hr = int(row["hour"])
+                    curr_dt_handler.hour = hr
+            if "minute" in row:
+                if row["minute"] != '':
+                    minute_val = float(row["minute"])
+                    minute_val = int(minute_val)
+                    curr_dt_handler.minute = minute_val
+            if "seconds" in row:
+                if row["seconds"] != '':
+                    secs = int(row["seconds"])
+                    curr_dt_handler.seconds = secs
     curr_dt_handler.process()
 
     row["datetime"] = curr_dt_handler.get_datetime()
@@ -100,6 +110,7 @@ def normalize(file_name, specs, formats):
     rows = dt_frames.to_dict('records')
     for row in rows:
         row = datetime_work(row, formats)
+        # TODO: Call function to perform geo_data_work here...
         normalized_rows.append(row)
     return normalized_rows
 
