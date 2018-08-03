@@ -1,6 +1,6 @@
 import datetime
-import calendar
 import configparser
+import time
 
 
 # TODO: Edit all methods in this class so that they have meaningful return values.
@@ -30,6 +30,7 @@ class DatetimeHandler:
         self.am_pm = None
         self.julian_day = None
         self.part_day = None
+        self.time_stamp = None
 
     def __calculate_part_day(self, hours, minutes=0.0, seconds=0.0):
         part_day = None
@@ -52,6 +53,7 @@ class DatetimeHandler:
         self.am_pm = dt_time.strftime("%p")
         self.julian_day = int(dt_time.strftime("%j"))
         self.part_day = self.__calculate_part_day(dt_time.hour, dt_time.minute, dt_time.second)
+        self.time_stamp = int(time.mktime(dt_time.timetuple()))
 
         return
 
@@ -223,3 +225,9 @@ class DatetimeHandler:
         if self.part_day is not None:
             part_day_str = str(self.part_day)
         return part_day_str
+
+    def get_timestamp(self):
+        timestamp_str = None
+        if self.time_stamp is not None:
+            timestamp_str = str(self.time_stamp)
+        return timestamp_str

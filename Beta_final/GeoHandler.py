@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import math as m
 
 class GeoHandler:
@@ -15,8 +16,8 @@ class GeoHandler:
     KM_TO_M = 1000
     KM_TO_NM = 0.539957
 
-    DEG_TO_MINS = 60
-    DEG_TO_SECS = 3600
+    DEG_TO_MINS = 60.0
+    DEG_TO_SECS = 3600.0
 
     LATITUDE = 'LATITUDE'
     LONGITUDE = 'LONGITUDE'
@@ -25,6 +26,8 @@ class GeoHandler:
     GEO_NORTH = 'N'
     GEO_EAST = 'E'
     GEO_WEST = 'W'
+
+    DECIMAL_PLACES = 4
 
     def __init__(self):
         self.longitude_deg_min_sec_dict = None
@@ -65,6 +68,7 @@ class GeoHandler:
         degrees = int(degrees_decimal_signed)
         minutes = int((degrees_decimal_signed - degrees) * GeoHandler.DEG_TO_MINS)
         seconds = (degrees_decimal_signed - degrees - (minutes / GeoHandler.DEG_TO_MINS)) * GeoHandler.DEG_TO_SECS
+        seconds = round(seconds, GeoHandler.DECIMAL_PLACES)
 
         return_val_dict['deg'] = degrees
         return_val_dict['min'] = minutes
@@ -74,9 +78,9 @@ class GeoHandler:
         return (return_val_dict, return_val_string)
 
     def __deg_min_sec_dict_to_signed_deg_decimal(self, degrees_minutes_seconds, cardinal_point):
-        degrees = float(degrees_minutes_seconds['deg'])
-        minutes = float(degrees_minutes_seconds['min'])
-        seconds = float(degrees_minutes_seconds['sec'])
+        degrees = degrees_minutes_seconds['deg']
+        minutes = degrees_minutes_seconds['min']
+        seconds = degrees_minutes_seconds['sec']
         decimal_return_val = None
         degrees_minutes_seconds_return_val = None
         cardinal = ((str(cardinal_point)).lower()).strip()
@@ -86,16 +90,21 @@ class GeoHandler:
         else:
             if seconds is None:
                 decimal_return_val = degrees+(minutes/60)
+                decimal_return_val = round(decimal_return_val, GeoHandler.DECIMAL_PLACES)
                 if (cardinal == 's') or (cardinal == 'w'):
                     decimal_return_val = -1*decimal_return_val
                 temp = str(minutes)
                 temp_split = temp.split('.')
-                decimal_part = float(temp_split[-1])
+                decimal_part = float('0.'+temp_split[-1])
                 seconds = decimal_part*60
-                degrees_minutes_seconds_return_val = str(degrees) + "°" + str(int(minutes)) + "'" + str(seconds)+'"'
+                seconds = round(seconds, GeoHandler.DECIMAL_PLACES)
+                degrees_minutes_seconds_return_val = str(int(degrees)) + "°" + str(int(minutes)) + "'" +\
+                                                     str(seconds)+'"'
             else:
                 decimal_return_val = degrees+(minutes/60)+(seconds/3600)
-                degrees_minutes_seconds_return_val = str(degrees) + "°" + str(int(minutes)) + "'" + str(seconds) + '"'
+                decimal_return_val = round(decimal_return_val, GeoHandler.DECIMAL_PLACES)
+                degrees_minutes_seconds_return_val = str(int(degrees)) + "°" + str(int(minutes)) + "'" \
+                                                     + str(seconds) + '"'
 
         return (decimal_return_val, degrees_minutes_seconds_return_val)
 
@@ -110,7 +119,7 @@ class GeoHandler:
             return_val = self.__deg_min_sec_dict_to_signed_deg_decimal(self.latitude_deg_min_sec_dict, self.lat_ns)
             self.latitude_signed_decimal, self.latitude_deg_min_sec = return_val
         if (self.longitude_deg_min_sec_dict is not None) and (self.longitude_signed_decimal is None):
-            return_val = self.__deg_min_sec_dict_to_signed_deg_decimal(self.longitude_deg_min_sec, self.long_ew)
+            return_val = self.__deg_min_sec_dict_to_signed_deg_decimal(self.longitude_deg_min_sec_dict, self.long_ew)
             self.longitude_signed_decimal, self.longitude_deg_min_sec = return_val
         return
 
@@ -138,7 +147,7 @@ class GeoHandler:
     def get_longitude(self, str_format=DEGREES_DECIMAL_FORMAT):
         return_value = None
         if str_format == GeoHandler.DEGREES_DECIMAL_FORMAT:
-            return_value = str(self.longitude_signed_decimal)
+            return_value = str(round(self.longitude_signed_decimal, GeoHandler.DECIMAL_PLACES))
         elif str_format == GeoHandler.DEGREES_MIN_SEC_FORMAT:
             return_value = str(self.longitude_deg_min_sec)
         return return_value
@@ -146,7 +155,7 @@ class GeoHandler:
     def get_latitude(self, str_format=DEGREES_DECIMAL_FORMAT):
         return_value=None
         if str_format == GeoHandler.DEGREES_DECIMAL_FORMAT:
-            return_value = str(self.latitude_signed_decimal)
+            return_value = str(round(self.latitude_signed_decimal, GeoHandler.DECIMAL_PLACES))
         elif str_format == GeoHandler.DEGREES_MIN_SEC_FORMAT:
             return_value = str(self.latitude_deg_min_sec)
         return return_value
