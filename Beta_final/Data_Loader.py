@@ -15,11 +15,17 @@ DEFAULT_DATETIME_FORMAT = Config.get('DATALOADER_FORMATS', 'datetime')
 DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
 DEFAULT_UNKNOWN = 'UNKNOWN-'
 
+NO_HEADER_ROW_INDICATOR = 0
+
 def handle_csv_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
+    data=None
+    if test_dict['header_row'] <= NO_HEADER_ROW_INDICATOR:
+        data = pd.read_csv(filename, header=None)
+    else:
+        data = pd.read_csv(filename)
 
-    data = pd.read_csv(filename)
     rows, cols = data.shape
     header_names = [DEFAULT_UNKNOWN]*cols
 
@@ -100,8 +106,11 @@ def handle_csv_input(filename, input_specs):
 def handle_xlsx_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
-
-    d_frames = pd.read_excel(filename, sheet_name=None)
+    d_frames=None
+    if test_dict['header_row'] <= NO_HEADER_ROW_INDICATOR:
+        d_frames = pd.read_excel(filename, sheet_name=None, header=None)
+    else:
+        d_frames = pd.read_excel(filename, sheet_name=None)
     rows, cols = d_frames.shape
     header_names = [DEFAULT_UNKNOWN]*cols
 
@@ -110,7 +119,10 @@ def handle_xlsx_input(filename, input_specs):
         header_names[count] = item+str(count)
         count += 1
     for key, value in test_dict['mappings'].items():
-        header_names[int(value)-1] = key
+        value = int(value)
+        pos_val=value-1
+        if pos_val < len(header_names):
+            header_names[pos_val] = key
     d_frames.columns = header_names
 
     formats_present = False

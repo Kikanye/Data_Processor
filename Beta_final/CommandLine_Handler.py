@@ -114,6 +114,7 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
     files_list = []
     dir_path_object = pathlib2.Path(dir_path)
     for item in dir_path_object.iterdir():
+        item = str(item)
         item_split = item.split('.')
         extension = item_split[-1]
         if extension == 'csv' or extension == 'xlsx' or extension == 'xls':

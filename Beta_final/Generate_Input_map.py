@@ -11,6 +11,7 @@ import openpyxl
 import configparser
 
 RESET_VALUE='reset'
+NO_HEADER_ROW_INDICATOR = 0
 
 def get_input(item):
     return_dict = {"column": -1, "format": ''}
@@ -97,10 +98,28 @@ def generate_input_map(json_template):
             re_processing = False
             return_dict = info
 
-    header_row = raw_input("What row in the file contains the column headings?")
-    if (header_row.strip() != '1') and (header_row != '') and (header_row.isdigit()):
+    invalid_header_input = True
+    header_row = None
+    header_row_is_number = False
+
+    while invalid_header_input:
+        header_row = raw_input("\nWhat row in the file contains the column headings?"
+                               " (If nothing is entered it will default to 1)")
+        header_row = header_row.strip()
+        try:
+            int_test = int(header_row)
+            header_row_is_number = True
+            invalid_header_input = False
+        except Exception as e:
+            print e
+            print('Invalid entry, input needs to be a number.')
+
+    if (header_row != '1') and (header_row != '') and (header_row_is_number):
         header_row = int(header_row)
-        return_dict["header_row"] = header_row
+        if (header_row <= 0):
+            return_dict["header_row"] = NO_HEADER_ROW_INDICATOR
+        else:
+            return_dict["header_row"] = header_row
     sorted_headers=sorted(return_dict['mappings'].items(), key=lambda x:(x[1]))
     for item in sorted_headers:
         return_dict["header_list"].append(item[0])
