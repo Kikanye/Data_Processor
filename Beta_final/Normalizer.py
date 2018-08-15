@@ -211,6 +211,7 @@ def geo_data_work(row):
 
 
 def normalize(file_name, specs, formats):
+    print ("Normalizing {}".format(file_name))
     normalized_rows = []
     with open(specs) as the_specs:
         template_specs = json.load(the_specs)

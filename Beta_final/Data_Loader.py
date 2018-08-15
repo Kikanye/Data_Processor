@@ -39,7 +39,7 @@ def handle_csv_input(filename, input_specs):
         count += 1
     for key, value in test_dict['mappings'].items():
         if(value>cols):
-            print(" The field {} was specified to be at {}, but this is out of the range in the input file.".
+            print(" \nThe field {} was specified to be at {}, but this is out of the range in the input file.".
                   format(key, value))
         else:
             header_names[int(value)-1] = key
@@ -183,7 +183,7 @@ def handle_xlsx_input(filename, input_specs):
 
 
 def get_input(filename, input_map):
-    print("Reading input from {}".format(filename))
+    print("\nReading input from {}".format(filename))
     the_path=pathlib2.Path(filename)
     fname = the_path.name
     filename_split = fname.split('.')
@@ -201,6 +201,7 @@ def get_input(filename, input_map):
 
 def process_input(list_of_rows, output_template):
     # TODO: Find someway to not use literals when comparing keys
+    print("Processing input gotten from the file...")
     out_list=[]
     with open(output_template) as j_temp_specs:
         template_specs = json.load(j_temp_specs)
@@ -254,6 +255,7 @@ def handle_csv_output():
 
 
 def load_output(dictionary_list, filename, in_filename, output_specs):
+    print("Loading processed data into {}".format(filename))
     return_val=''
     the_path = pathlib2.Path(filename)
     fname = the_path.name

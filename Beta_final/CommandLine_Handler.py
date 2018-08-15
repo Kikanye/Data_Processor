@@ -6,8 +6,11 @@ import json
 import JSON_Template_Generator, Data_Loader, Normalizer, Generate_Input_map
 import configparser
 import traceback
+import time
 
-
+#TODO: Line 145 (time.sleep(1.5)) may be removed for increased speed if running at command line,
+#TODO: if that isnt there it causes Pycharm to have faulty print massages
+#TODO: [Error messages will be mixed with information messages]
 def parse_arguments(arguments):
     """This function will take in one parameter which is a list of values passed in from the command line,
     It returns a dictionary of containing all the arguments with appropriate keys."""
@@ -56,7 +59,6 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
     # Move the processing files into the right directories
     loaded_data_path_obj = pathlib2.Path(loaded_data_path)
     loaded_data_parent = loaded_data_path_obj.parent
-    print("Making directory for Loaded data template. ")
     loaded_data_destination =(loaded_data_parent.joinpath(directories["outputs"])).joinpath(directories['loaded'])
     print("Moving loaded data file into new directory")
     if ((loaded_data_destination.joinpath(loaded_data_path_obj.name)).exists()):
@@ -72,7 +74,6 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
 
     normalized_path_obj = pathlib2.Path(normalized_path)
     normalized_path_parent = normalized_path_obj.parent
-    print("Making directory for Normalized data template. ")
     normalized_data_destination = (normalized_path_parent.joinpath(directories["outputs"])).\
         joinpath(directories['normalized'])
     print("Moving Normalized data file into new directory.")
@@ -140,14 +141,15 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
                                   input_map_path=input_map_path,
                                   move_ip_map=False)
             except Exception as e:
-                traceback.print_exc()
-                print("Processing {} failed".format(file))
+                print("\nPROCESSING FAILURE: Processing {} failed".format(file))
                 print(e)
+                traceback.print_exc()
+            time.sleep(1.5) #This will fix the issue of having wierd printing in the wrong places (info inbetween errors)
 
         # Move the files into the right directories after processing.
         ip_map = pathlib2.Path(input_map_path)
         ip_parent = ip_map.parent
-        print("Making directory for json maps. ")
+        print("\nMaking directory for json maps. ")
         json_templates_path = ip_parent.joinpath(directories['json_maps'])
         print("Moving json maps data file into new directory.")
         if (json_templates_path.joinpath(ip_map.name)).exists():
@@ -217,10 +219,13 @@ def main():
 
         # Check to see if the directories that will contain the auto generated files exist already, if not create them.
         if (not(outputs_dir.exists())):
+            print("Making directory for processed data . ")
             os.mkdir(str(outputs_dir))
         if (not(normalized_dir.exists())):
+            print("Making directory for Normalized data template. ")
             os.mkdir(str(normalized_dir))
         if (not(loaded_dir.exists())):
+            print("Making directory for Loaded data template. ")
             os.mkdir(str(loaded_dir))
 
         # Create the filename string for the Json map that will be used for the template file
@@ -256,7 +261,7 @@ def main():
                 handle_file_input(input_file_or_dir, template_file_path, template_json_map_path, formats, dirs,
                               input_map_path=input_map_path)
             except Exception as e:
-                print("Failed to process {}".format(input_file_or_dir))
+                print("\nPROCESSING FAILURE: Processing {} failed".format(input_file_or_dir))
                 print(e)
                 traceback.print_exc()
 
