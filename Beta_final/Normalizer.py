@@ -88,7 +88,7 @@ def datetime_work(row, formats):
     row["am/pm"] = curr_dt_handler.get_am_pm()
     row["julian_day"] = curr_dt_handler.get_julian_day()
     row["part_day"] = curr_dt_handler.get_part_day()
-    row["datetime_timestamp"] = curr_dt_handler.get_timestamp()
+    row["unix_timestamp"] = curr_dt_handler.get_timestamp()
 
     return row
 
