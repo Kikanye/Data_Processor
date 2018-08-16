@@ -34,8 +34,6 @@ class GeoHandler:
         self.latitude_deg_min_sec_dict = None
         self.longitude_deg_min_sec = None
         self.latitude_deg_min_sec = None
-        #self.longitude_unsigned_decimal = None
-        #self.latitude_unsigned_decimal = None
         self.longitude_signed_decimal = None
         self.latitude_signed_decimal = None
         self.lat_ns = None
@@ -56,15 +54,19 @@ class GeoHandler:
         return_val_dict = {'deg': None, 'min': None, 'sec': None}
         if (degrees_decimal_signed<0):
             if (lat_or_long == GeoHandler.LATITUDE):
-                self.lat_ns = GeoHandler.GEO_SOUTH
+                if (self.lat_ns is None):
+                    self.lat_ns = GeoHandler.GEO_SOUTH
             elif (lat_or_long == GeoHandler.LONGITUDE):
-                self. long_ew = GeoHandler.GEO_WEST
+                if (self.long_ew is None):
+                    self. long_ew = GeoHandler.GEO_WEST
             degrees_decimal_signed = -1 * degrees_decimal_signed
         else:
             if lat_or_long ==GeoHandler.LATITUDE:
-                self.lat_ns = GeoHandler.GEO_NORTH
+                if self.lat_ns is None:
+                    self.lat_ns = GeoHandler.GEO_NORTH
             elif lat_or_long == GeoHandler.LONGITUDE:
-                self.long_ew = GeoHandler.GEO_EAST
+                if self.long_ew is None:
+                    self.long_ew = GeoHandler.GEO_EAST
         degrees = int(degrees_decimal_signed)
         minutes = int((degrees_decimal_signed - degrees) * GeoHandler.DEG_TO_MINS)
         seconds = (degrees_decimal_signed - degrees - (minutes / GeoHandler.DEG_TO_MINS)) * GeoHandler.DEG_TO_SECS
@@ -121,6 +123,11 @@ class GeoHandler:
         if (self.longitude_deg_min_sec_dict is not None) and (self.longitude_signed_decimal is None):
             return_val = self.__deg_min_sec_dict_to_signed_deg_decimal(self.longitude_deg_min_sec_dict, self.long_ew)
             self.longitude_signed_decimal, self.longitude_deg_min_sec = return_val
+
+        if self.long_ew is not None:
+            self.long_ew = (self.long_ew).upper()
+        if self.lat_ns is not None:
+            self.lat_ns = (self.lat_ns).upper()
         return
 
     def __calculate_dictance(self, geo1, geo2):

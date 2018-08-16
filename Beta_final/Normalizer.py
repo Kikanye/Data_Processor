@@ -192,13 +192,13 @@ def geo_data_work(row):
             curr_geo_handler.longitude_deg_min_sec_dict = deg_min_sec_dict
 
     if "e/w" in row:
-        if (row["e/w"] != '') and (row["e/w"] is None):
+        if (row["e/w"] != '') and (row["e/w"] is not None):
             lat_cardinal = row['e/w']
             lat_cardinal = (str(lat_cardinal).lower()).strip()
             if lat_cardinal == 'e':
-                curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_NORTH
+                curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_EAST
             elif lat_cardinal == 'w':
-                curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_SOUTH
+                curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_WEST
 
     curr_geo_handler.process()
     row["latitude_deg_dec"] = curr_geo_handler.get_latitude(GeoHandler.GeoHandler.DEGREES_DECIMAL_FORMAT)

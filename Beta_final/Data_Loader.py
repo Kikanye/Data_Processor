@@ -18,6 +18,8 @@ DEFAULT_UNKNOWN = 'UNKNOWN-'
 NO_HEADER_ROW_INDICATOR = 0
 DEFAULT_HEADER_ROW_NUMBER =1
 
+
+
 def handle_csv_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
@@ -84,12 +86,19 @@ def handle_csv_input(filename, input_specs):
             curr_index = 0
             for item in time_list:
                 pos = curr_index
-                if (str(ampm_list[pos]).lower()).strip() == 'pm':
+                val = (str(ampm_list[pos]).lower()).strip()
+                cleaned_val = ''
+                for letter in val:
+                    if letter.isalpha():
+                        cleaned_val += letter
+                cleaned_val = cleaned_val.lower()
+                if cleaned_val == 'pm':
                     print("Time {} at position {} is pm".format(item, pos))
                     time_list[pos] = time_list[pos] + datetime.timedelta(hours=12)
                 curr_index += 1
             time_series = pd.Series(time_list)
             data['time'] = time_series
+
     if ("datetime" in header_names):
         if ((formats_present)and formats.has_key("datetime")):
             datetime_format = formats["datetime"]
@@ -139,42 +148,66 @@ def handle_xlsx_input(filename, input_specs):
             formats_present = True
 
         if ("date" in header_names):
-            if ((formats_present) and formats.has_key("date")):
-                date_format = formats["date"]
-                try:
-                    d_frames["date"] = pd.to_datetime(d_frames["date"], format=date_format)
-                except Exception as e:
-                    print(e)
-                    print("Failed to read in date using the format {}\n Will try to infer the format."
-                          .format(date_format))
-                    d_frames["date"] = pd.to_datetime(d_frames["date"])
-            else:
+            if (not ((d_frames["date"].dtype == datetime.date) or (d_frames["date"].dtype == datetime.datetime))):
+                if ((formats_present) and formats.has_key("date")):
+                    date_format = formats["date"]
+                    try:
+                        d_frames["date"] = pd.to_datetime(d_frames["date"], format=date_format)
+                    except Exception as e:
+                        print(e)
+                        print("Failed to read in date using the format {}\n Will try to infer the format."
+                              .format(date_format))
+                        d_frames["date"] = pd.to_datetime(d_frames["date"])
+                else:
                     d_frames["date"] = pd.to_datetime(d_frames["date"])
 
         if ("time" in header_names):
-            if ((formats_present) and formats.has_key("time")):
-                time_format = formats["time"]
-                try:
-                    d_frames["time"] = pd.to_datetime(d_frames["time"], format=time_format)
-                except Exception as e:
-                    print(e)
-                    print("Failed to read in the time using the format {}\n Will try to infer the format."
-                          .format(time_format))
+            if (not ((d_frames["time"].dtype == datetime.time) or (d_frames["time"].dtype == datetime.datetime))):
+                do_ampm = False
+                if 'am/pm' in header_names:
+                    do_ampm = True
+                if ((formats_present) and formats.has_key("time")):
+                    time_format = formats["time"]
+                    try:
+                        d_frames["time"] = pd.to_datetime(d_frames["time"], format=time_format)
+                    except Exception as e:
+                        print(e)
+                        print("Failed to read in the time using the format {}\n Will try to infer the format."
+                              .format(time_format))
+                        d_frames["time"] = pd.to_datetime(d_frames["time"])
+                else:
                     d_frames["time"] = pd.to_datetime(d_frames["time"])
-            else:
-                    d_frames["time"] = pd.to_datetime(d_frames["time"])
+                if do_ampm:
+                    time_list = d_frames['time'].tolist()
+                    ampm_list = d_frames['am/pm'].tolist()
+                    curr_index = 0
+                    for item in time_list:
+                        pos = curr_index
+                        val = (str(ampm_list[pos]).lower()).strip()
+                        cleaned_val = ''
+                        for letter in val:
+                            if letter.isalpha():
+                                cleaned_val += letter
+                        cleaned_val = cleaned_val.lower()
+                        if cleaned_val == 'pm':
+                            print("Time {} at position {} is pm".format(item, pos))
+                            time_list[pos] = time_list[pos] + datetime.timedelta(hours=12)
+                        curr_index += 1
+                    time_series = pd.Series(time_list)
+                    d_frames['time'] = time_series
 
         if ("datetime" in header_names):
-            if ((formats_present) and formats.has_key("datetime")):
-                datetime_format = formats["datetime"]
-                try:
-                    d_frames["datetime"] = pd.to_datetime(d_frames["datetime"], format=datetime_format)
-                except Exception as e:
-                    print(e)
-                    print("Failed to read in the datetime using the format {}\n Will try to infer the format."
-                          .format(datetime_format))
-                    d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
-            else:
+            if (not (d_frames["datetime"].dtype == datetime.datetime)):
+                if ((formats_present) and formats.has_key("datetime")):
+                    datetime_format = formats["datetime"]
+                    try:
+                        d_frames["datetime"] = pd.to_datetime(d_frames["datetime"], format=datetime_format)
+                    except Exception as e:
+                        print(e)
+                        print("Failed to read in the datetime using the format {}\n Will try to infer the format."
+                              .format(datetime_format))
+                        d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
+                else:
                     d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
 
     d_frames = d_frames.where(pd.notnull(d_frames), None)
