@@ -64,6 +64,18 @@ def datetime_work(row, formats):
                     if "hour" in row:
                         if (row["hour"] != '') and (row["hour"] is not None):
                             hr = int(row["hour"])
+                            if "am/pm" in row:
+                                if (row["am/pm"] != '') and (row["am/pm"] is not None):
+                                    val = row['am/pm']
+                                    cleaned_val = ''
+                                    for letter in val:
+                                        if letter.isalpha():
+                                            cleaned_val += letter
+                                    cleaned_val = cleaned_val.lower()
+                                    if (hr < 12) and (cleaned_val == 'pm'):
+                                        hr = hr+12
+                                    if (hr == 12) and (cleaned_val == 'am'):
+                                        hr = 0
                             curr_dt_handler.hour = hr
                     if "minute" in row:
                         if (row["minute"] != '') and (row["minute"] is not None):

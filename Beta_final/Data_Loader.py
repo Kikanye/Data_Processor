@@ -148,7 +148,10 @@ def handle_xlsx_input(filename, input_specs):
             formats_present = True
 
         if ("date" in header_names):
-            if (not ((d_frames["date"].dtype == datetime.date) or (d_frames["date"].dtype == datetime.datetime))):
+            type_get = d_frames['date'].apply(type)
+            type_test = (type_get == datetime.datetime).all() or (type_get == datetime.date).all()
+
+            if not(type_test.all):
                 if ((formats_present) and formats.has_key("date")):
                     date_format = formats["date"]
                     try:
@@ -157,12 +160,15 @@ def handle_xlsx_input(filename, input_specs):
                         print(e)
                         print("Failed to read in date using the format {}\n Will try to infer the format."
                               .format(date_format))
-                        d_frames["date"] = pd.to_datetime(d_frames["date"])
+                        d_frames["date"] = pd.to_datetime(d_frames["date"], errors='coerce')
                 else:
-                    d_frames["date"] = pd.to_datetime(d_frames["date"])
+                    d_frames["date"] = pd.to_datetime(d_frames["date"], errors='coerce')
 
         if ("time" in header_names):
-            if (not ((d_frames["time"].dtype == datetime.time) or (d_frames["time"].dtype == datetime.datetime))):
+            type_get = d_frames['time'].apply(type)
+            type_test = (type_get == datetime.datetime).all() or (type_get == datetime.time).all()
+
+            if not(type_test):
                 do_ampm = False
                 if 'am/pm' in header_names:
                     do_ampm = True
@@ -174,9 +180,9 @@ def handle_xlsx_input(filename, input_specs):
                         print(e)
                         print("Failed to read in the time using the format {}\n Will try to infer the format."
                               .format(time_format))
-                        d_frames["time"] = pd.to_datetime(d_frames["time"])
+                        d_frames["time"] = pd.to_datetime(d_frames["time"], errors='coerce')
                 else:
-                    d_frames["time"] = pd.to_datetime(d_frames["time"])
+                    d_frames["time"] = pd.to_datetime(d_frames["time"], errors='coerce')
                 if do_ampm:
                     time_list = d_frames['time'].tolist()
                     ampm_list = d_frames['am/pm'].tolist()
@@ -197,7 +203,10 @@ def handle_xlsx_input(filename, input_specs):
                     d_frames['time'] = time_series
 
         if ("datetime" in header_names):
-            if (not (d_frames["datetime"].dtype == datetime.datetime)):
+            type_get = d_frames['datetime'].apply(type)
+            type_test = (type_get == datetime.datetime).all()
+
+            if not(type_test):
                 if ((formats_present) and formats.has_key("datetime")):
                     datetime_format = formats["datetime"]
                     try:
@@ -206,9 +215,9 @@ def handle_xlsx_input(filename, input_specs):
                         print(e)
                         print("Failed to read in the datetime using the format {}\n Will try to infer the format."
                               .format(datetime_format))
-                        d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
+                        d_frames["datetime"] = pd.to_datetime(d_frames["datetime"], errors='coerce')
                 else:
-                    d_frames["datetime"] = pd.to_datetime(d_frames["datetime"])
+                    d_frames["datetime"] = pd.to_datetime(d_frames["datetime"], errors='coerce')
 
     d_frames = d_frames.where(pd.notnull(d_frames), None)
     data_list = d_frames.to_dict('records')
