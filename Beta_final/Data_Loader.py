@@ -129,7 +129,7 @@ def handle_xlsx_input(filename, input_specs):
             type_get = d_frames['date'].apply(type)
             type_test = (type_get == datetime.datetime).all() or (type_get == datetime.date).all()
 
-            if not(type_test.all):
+            if not(type_test):
                 if ((formats_present) and formats.has_key("date")):
                     date_format = formats["date"]
                     try:
@@ -143,7 +143,10 @@ def handle_xlsx_input(filename, input_specs):
                     d_frames["date"] = pd.to_datetime(d_frames["date"], errors='coerce')
 
         if ("time" in header_names):
+            type_get = d_frames['time'].apply(type)
+            type_test = (type_get == datetime.datetime).all() or (type_get == datetime.time).all()
 
+            if not(type_test):
                 if ((formats_present) and formats.has_key("time")):
                     time_format = formats["time"]
                     try:
