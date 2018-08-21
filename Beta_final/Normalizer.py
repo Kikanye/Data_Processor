@@ -108,9 +108,9 @@ def datetime_work(row, formats):
 def geo_data_work(row):
     curr_geo_handler = GeoHandler.GeoHandler()
 
-    if "latitude_deg_dec" in row:
-        if (row["latitude_deg_dec"] != '') and (row["latitude_deg_dec"] is not None):
-            latitude_degrees_decimal = row['latitude_deg_dec']
+    if "latitude_decdeg" in row:
+        if (row["latitude_decdeg"] != '') and (row["latitude_decdeg"] is not None):
+            latitude_degrees_decimal = row['latitude_decdeg']
             lat_string = str(latitude_degrees_decimal)
             lat_string = lat_string.replace(',', '.')
             cardinal_point = None
@@ -127,28 +127,28 @@ def geo_data_work(row):
             elif cardinal_point == 's':
                 curr_geo_handler.lat_ns = GeoHandler.GeoHandler.GEO_SOUTH
 
-    if "latitude_min_sec" in row:
+    if "latitude_minsec" in row:
         deg_min_sec_dict = {'deg': None, 'min': None, 'sec': None}
-        if (row["latitude_min_sec"] != '') and (row["latitude_min_sec"] is not None):
-            latitude_min_sec = row['latitude_min_sec']
-            latitude_min_sec_split = latitude_min_sec.split('°')
-            deg_min_sec_dict['deg'] = float(latitude_min_sec_split[0])
+        if (row["latitude_minsec"] != '') and (row["latitude_minsec"] is not None):
+            latitude_minsec = row['latitude_minsec']
+            latitude_minsec_split = latitude_minsec.split(u'°')
+            deg_min_sec_dict['deg'] = float(latitude_minsec_split[0])
 
-            latitude_min_sec_part = latitude_min_sec_split[-1]
-            latitude_min_sec_part = (latitude_min_sec_part.strip())
-            for char in latitude_min_sec_part:
+            latitude_minsec_part = latitude_minsec_split[-1]
+            latitude_minsec_part = (latitude_minsec_part.strip())
+            for char in latitude_minsec_part:
                 if char.isalpha():
-                    latitude_min_sec_part = latitude_min_sec_part.replace(char, '')
+                    latitude_minsec_part = latitude_minsec_part.replace(char, '')
                     if char.lower() == 'n':
                         curr_geo_handler.lat_ns = GeoHandler.GeoHandler.GEO_NORTH
                     elif char.lower() == 's':
                         curr_geo_handler.lat_ns = GeoHandler.GeoHandler.GEO_SOUTH
 
-            latitude_min_sec_part = latitude_min_sec_part.replace('"', '')
-            latitude_min_sec_part_split = latitude_min_sec_part.split("'")
-            deg_min_sec_dict['min'] = float(latitude_min_sec_part_split[0])
-            if len(latitude_min_sec_part_split) == 2:
-                deg_min_sec_dict['sec'] = float(latitude_min_sec_part_split[1])
+            latitude_minsec_part = latitude_minsec_part.replace('"', '')
+            latitude_minsec_part_split = latitude_minsec_part.split("'")
+            deg_min_sec_dict['min'] = float(latitude_minsec_part_split[0])
+            if len(latitude_minsec_part_split) == 2:
+                deg_min_sec_dict['sec'] = float(latitude_minsec_part_split[1])
             curr_geo_handler.latitude_deg_min_sec_dict = deg_min_sec_dict
 
     if "n/s" in row:
@@ -160,9 +160,9 @@ def geo_data_work(row):
             elif lat_cardinal == 's':
                 curr_geo_handler.lat_ns = GeoHandler.GeoHandler.GEO_SOUTH
 
-    if "longitude_deg_dec" in row:
-        if row["longitude_deg_dec"] != '':
-            longitude_degrees_decimal = row["longitude_deg_dec"]
+    if "longitude_decdeg" in row:
+        if row["longitude_decdeg"] != '':
+            longitude_degrees_decimal = row["longitude_decdeg"]
             long_string = str(longitude_degrees_decimal)
             long_string = long_string.replace(',', '.')
             cardinal_point = None
@@ -179,28 +179,28 @@ def geo_data_work(row):
             elif cardinal_point == 'w':
                 curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_WEST
 
-    if "longitude_min_sec" in row:
+    if "longitude_minsec" in row:
         deg_min_sec_dict = {'deg': None, 'min': None, 'sec': None}
-        if (row["longitude_min_sec"] != '') and (row["longitude_min_sec"] is not None):
-            longitude_min_sec = row["longitude_min_sec"]
-            longitude_min_sec_split = longitude_min_sec.split('°')
-            deg_min_sec_dict['deg'] = float(longitude_min_sec_split[0])
+        if (row["longitude_minsec"] != '') and (row["longitude_minsec"] is not None):
+            longitude_minsec = row["longitude_minsec"]
+            longitude_minsec_split = longitude_minsec.split(u'°')
+            deg_min_sec_dict['deg'] = float(longitude_minsec_split[0])
 
-            longitude_min_sec_part = longitude_min_sec_split[-1]
-            longitude_min_sec_part = (longitude_min_sec_part.strip())
-            for char in longitude_min_sec_part:
+            longitude_minsec_part = longitude_minsec_split[-1]
+            longitude_minsec_part = (longitude_minsec_part.strip())
+            for char in longitude_minsec_part:
                 if char.isalpha():
-                    longitude_min_sec_part = longitude_min_sec_part.replace(char, '')
+                    longitude_minsec_part = longitude_minsec_part.replace(char, '')
                     if char.lower() == 'e':
                         curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_EAST
                     elif char.lower() == 'w':
                         curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_WEST
 
-            longitude_min_sec_part = longitude_min_sec_part.replace('"', '')
-            longitude_min_sec_part_split = longitude_min_sec_part.split("'")
-            deg_min_sec_dict['min'] = float(longitude_min_sec_part_split[0])
-            if len(longitude_min_sec_part_split) == 2:
-                deg_min_sec_dict['sec'] = float(longitude_min_sec_part_split[1])
+            longitude_minsec_part = longitude_minsec_part.replace('"', '')
+            longitude_minsec_part_split = longitude_minsec_part.split("'")
+            deg_min_sec_dict['min'] = float(longitude_minsec_part_split[0])
+            if len(longitude_minsec_part_split) == 2:
+                deg_min_sec_dict['sec'] = float(longitude_minsec_part_split[1])
             curr_geo_handler.longitude_deg_min_sec_dict = deg_min_sec_dict
 
     if "e/w" in row:
@@ -213,10 +213,10 @@ def geo_data_work(row):
                 curr_geo_handler.long_ew = GeoHandler.GeoHandler.GEO_WEST
 
     curr_geo_handler.process()
-    row["latitude_deg_dec"] = curr_geo_handler.get_latitude(GeoHandler.GeoHandler.DEGREES_DECIMAL_FORMAT)
-    row["latitude_min_sec"] = curr_geo_handler.get_latitude(GeoHandler.GeoHandler.DEGREES_MIN_SEC_FORMAT)
-    row["longitude_deg_dec"] = curr_geo_handler.get_longitude(GeoHandler.GeoHandler.DEGREES_DECIMAL_FORMAT)
-    row["longitude_min_sec"] = curr_geo_handler.get_longitude(GeoHandler.GeoHandler.DEGREES_MIN_SEC_FORMAT)
+    row["latitude_decdeg"] = curr_geo_handler.get_latitude(GeoHandler.GeoHandler.DEGREES_DECIMAL_FORMAT)
+    row["latitude_minsec"] = curr_geo_handler.get_latitude(GeoHandler.GeoHandler.DEGREES_MIN_SEC_FORMAT)
+    row["longitude_decdeg"] = curr_geo_handler.get_longitude(GeoHandler.GeoHandler.DEGREES_DECIMAL_FORMAT)
+    row["longitude_minsec"] = curr_geo_handler.get_longitude(GeoHandler.GeoHandler.DEGREES_MIN_SEC_FORMAT)
     row["n/s"] = curr_geo_handler.lat_ns
     row["e/w"] = curr_geo_handler.long_ew
     return row
