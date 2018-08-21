@@ -19,7 +19,6 @@ NO_HEADER_ROW_INDICATOR = 0
 DEFAULT_HEADER_ROW_NUMBER =1
 
 
-
 def handle_csv_input(filename, input_specs):
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
@@ -93,7 +92,6 @@ def handle_csv_input(filename, input_specs):
                         cleaned_val += letter
                 cleaned_val = cleaned_val.lower()
                 if cleaned_val == 'pm':
-                    print("Time {} at position {} is pm".format(item, pos))
                     time_list[pos] = time_list[pos] + datetime.timedelta(hours=12)
                 curr_index += 1
             time_series = pd.Series(time_list)
@@ -196,7 +194,6 @@ def handle_xlsx_input(filename, input_specs):
                                 cleaned_val += letter
                         cleaned_val = cleaned_val.lower()
                         if cleaned_val == 'pm':
-                            print("Time {} at position {} is pm".format(item, pos))
                             time_list[pos] = time_list[pos] + datetime.timedelta(hours=12)
                         curr_index += 1
                     time_series = pd.Series(time_list)
