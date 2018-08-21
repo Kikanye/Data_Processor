@@ -10,7 +10,9 @@ import time
 
 #TODO: Line 145 (time.sleep(1.5)) may be removed for increased speed if running at command line,
 #TODO: if that isnt there it causes Pycharm to have faulty print massages
-#TODO: [Error messages will be mixed with information messages]
+#TODO: [Error messages will be mixed with information messages].
+
+
 def parse_arguments(arguments):
     """This function will take in one parameter which is a list of values passed in from the command line,
     It returns a dictionary of containing all the arguments with appropriate keys."""
@@ -214,8 +216,8 @@ def main():
 
         # Get the names of the directories to put the output files into.
         outputs_dir = template_parent_dir.joinpath(dirs['outputs'])
-        normalized_dir = outputs_dir.joinpath(dirs['loaded'])
-        loaded_dir = outputs_dir.joinpath(dirs["normalized"])
+        loaded_dir = outputs_dir.joinpath(dirs['loaded'])
+        normalized_dir = outputs_dir.joinpath(dirs["normalized"])
 
         # Check to see if the directories that will contain the auto generated files exist already, if not create them.
         if (not(outputs_dir.exists())):
