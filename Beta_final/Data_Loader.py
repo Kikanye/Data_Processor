@@ -66,9 +66,6 @@ def handle_csv_input(filename, input_specs):
         else:
             data["date"] = pd.to_datetime(data["date"])
     if ("time" in header_names):
-        do_ampm = False
-        if 'am/pm' in header_names:
-            do_ampm = True
         if ((formats_present)and formats.has_key("time")):
             time_format = formats["time"]
             try:
@@ -79,23 +76,6 @@ def handle_csv_input(filename, input_specs):
                 data["time"] = pd.to_datetime(data["time"])
         else:
             data["time"] = pd.to_datetime(data["time"])
-        if do_ampm:
-            time_list = data['time'].tolist()
-            ampm_list = data['am/pm'].tolist()
-            curr_index = 0
-            for item in time_list:
-                pos = curr_index
-                val = (str(ampm_list[pos]).lower()).strip()
-                cleaned_val = ''
-                for letter in val:
-                    if letter.isalpha():
-                        cleaned_val += letter
-                cleaned_val = cleaned_val.lower()
-                if cleaned_val == 'pm':
-                    time_list[pos] = time_list[pos] + datetime.timedelta(hours=12)
-                curr_index += 1
-            time_series = pd.Series(time_list)
-            data['time'] = time_series
 
     if ("datetime" in header_names):
         if ((formats_present)and formats.has_key("datetime")):
@@ -163,13 +143,7 @@ def handle_xlsx_input(filename, input_specs):
                     d_frames["date"] = pd.to_datetime(d_frames["date"], errors='coerce')
 
         if ("time" in header_names):
-            type_get = d_frames['time'].apply(type)
-            type_test = (type_get == datetime.datetime).all() or (type_get == datetime.time).all()
 
-            if not(type_test):
-                do_ampm = False
-                if 'am/pm' in header_names:
-                    do_ampm = True
                 if ((formats_present) and formats.has_key("time")):
                     time_format = formats["time"]
                     try:
@@ -181,23 +155,6 @@ def handle_xlsx_input(filename, input_specs):
                         d_frames["time"] = pd.to_datetime(d_frames["time"], errors='coerce')
                 else:
                     d_frames["time"] = pd.to_datetime(d_frames["time"], errors='coerce')
-                if do_ampm:
-                    time_list = d_frames['time'].tolist()
-                    ampm_list = d_frames['am/pm'].tolist()
-                    curr_index = 0
-                    for item in time_list:
-                        pos = curr_index
-                        val = (str(ampm_list[pos]).lower()).strip()
-                        cleaned_val = ''
-                        for letter in val:
-                            if letter.isalpha():
-                                cleaned_val += letter
-                        cleaned_val = cleaned_val.lower()
-                        if cleaned_val == 'pm':
-                            time_list[pos] = time_list[pos] + datetime.timedelta(hours=12)
-                        curr_index += 1
-                    time_series = pd.Series(time_list)
-                    d_frames['time'] = time_series
 
         if ("datetime" in header_names):
             type_get = d_frames['datetime'].apply(type)

@@ -18,6 +18,7 @@ def datetime_work(row, formats):
             try:
                 curr_dt_handler.date_time = datetime.datetime.strptime(dt_time, formats["datetime_format"])
             except Exception as e:
+                print(e)
                 print("Provided format for reading datetime failed in normalizer, will use default format {}"
                       .format(DEFAULT_DATETIME_FORMAT))
                 formats["datetime_format"]=DEFAULT_DATETIME_FORMAT
@@ -30,6 +31,7 @@ def datetime_work(row, formats):
                     try:
                         curr_dt_handler.date = (datetime.datetime.strptime(dt, formats["date_format"])).date()
                     except Exception as e:
+                        print(e)
                         print("Provided format for reading date failed in normalizer, will use default format {}".
                               format(DEFAULT_DATE_FORMAT))
                         formats["datetime_format"] = DEFAULT_DATE_FORMAT
@@ -50,15 +52,32 @@ def datetime_work(row, formats):
                             curr_dt_handler.year = yr
 
             if "time" in row:
+                curr_time = None
                 if (row["time"] != '') and (row["time"] is not None):
                     t = row["time"]
                     try:
-                        curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+                        curr_time = datetime.datetime.strptime(t, formats["time_format"])
                     except Exception as e:
+                        print(e)
                         print("Provided format for reading time in normalizer, will use default format {}".
                               format(DEFAULT_TIME_FORMAT))
                         formats["datetime_format"] = DEFAULT_TIME_FORMAT
-                        curr_dt_handler.time = (datetime.datetime.strptime(t, formats["time_format"])).time()
+                        curr_time = datetime.datetime.strptime(t, formats["time_format"])
+
+                    do_ampm = False
+                    if ('am/pm' in row) and (row['am/pm'] is not None) and (row['am/pm'] != ''):
+                        do_ampm = True
+                    if do_ampm and (curr_time is not None):
+                        val = row['am/pm']
+                        cleaned_val = ''
+                        for letter in val:
+                            if letter.isalpha():
+                                cleaned_val += letter
+                        cleaned_val = cleaned_val.lower()
+                        if cleaned_val == 'pm':
+                            curr_time = curr_time + datetime.timedelta(hours=12)
+
+                    curr_dt_handler.time = curr_time.time()
 
                 else:
                     if "hour" in row:
