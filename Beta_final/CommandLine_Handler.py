@@ -1,3 +1,9 @@
+"""This Script will be used to accept command line arguments needed to run the loader and Normalizer
+(load the data into a template and then normalize consecutively). It calls functions from other scripts
+to make this work. It will parse the arguments and allow the user to run the Data Processor either for a single file,
+or for a directory filled with files into the same template
+(it will produce copies of that template for the different files)."""
+
 import sys
 import os
 import shutil
@@ -6,11 +12,6 @@ import json
 import JSON_Template_Generator, Data_Loader, Normalizer, Generate_Input_map
 import configparser
 import traceback
-import time
-
-#TODO: Line 145 (time.sleep(1.5)) may be removed for increased speed if running at command line,
-#TODO: if that isnt there it causes Pycharm to have faulty print massages
-#TODO: [Error messages will be mixed with information messages].
 
 
 def parse_arguments(arguments):
@@ -31,6 +32,10 @@ def parse_arguments(arguments):
         arg_split = arg.split('=')
         arg_name = arg_split[0].strip()
         arg_variable = arg_split[1].strip()
+        if arg_name not in arg_dict:
+            print('An unexpected argument was supplied. Please check adjust {} to an expected argument and try again'
+                  .format(arg_name))
+            exit(-1)
         arg_dict[arg_name] = arg_variable
 
     return arg_dict
@@ -146,7 +151,6 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
                 print("\nPROCESSING FAILURE: Processing {} failed".format(file))
                 print(e)
                 traceback.print_exc()
-            time.sleep(1.5) #This will fix the issue of having wierd printing in the wrong places (info inbetween errors)
 
         # Move the files into the right directories after processing.
         ip_map = pathlib2.Path(input_map_path)

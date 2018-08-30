@@ -16,7 +16,7 @@ import time
 def parse_arguments(arguments):
     """This function will take in one parameter which is a list of values passed in from the command line,
     It returns a dictionary of containing all the arguments with appropriate keys."""
-    arg_dict = {'input': None,'template': None, 'input_map': None, 'template_header': None}
+    arg_dict = {'input': None, 'template': None, 'input_map': None, 'template_header': None}
     if ('=' in arguments[1] or '=' in arguments[2]):
         raise Exception("Invalid character found in first and/or second argument,\n"
                         "First and/or second arguments must not have '=' signs, must be raw file paths.")
@@ -31,6 +31,10 @@ def parse_arguments(arguments):
         arg_split = arg.split('=')
         arg_name = arg_split[0].strip()
         arg_variable = arg_split[1].strip()
+        if arg_name not in arg_dict:
+            print('An unexpected argument was supplied. Please check adjust {} to an expected argument and try again'
+                  .format(arg_name))
+            exit(-1)
         arg_dict[arg_name] = arg_variable
 
     return arg_dict
@@ -212,9 +216,9 @@ def main():
         # Create the filename string for the Json map that will be used for the template file
         template_json_map_path = str(template_parent_dir.joinpath(template_fname_split[0] + '.json'))
 
-        if (args_dictionary['input_map']!=None):
+        if args_dictionary['input_map'] is not None:
             input_map_path = args_dictionary['input_map']
-        if (args_dictionary['template_header']!=None):
+        if args_dictionary['template_header'] is not None:
             template_header_number = int(args_dictionary['template_header'])
 
     # Call functions from the JSON Template Generator to create the JSON_Template map
@@ -228,8 +232,8 @@ def main():
         if (input_data_path.is_file()):
             print('Processing single file.')
             input_fname=input_data_path.name
-            input_fname_split=input_fname.split('.')
-            extension=input_fname_split[-1]
+            input_fname_split = input_fname.split('.')
+            extension = input_fname_split[-1]
 
             if not((extension == 'csv') or (extension == 'xlsx') or (extension == 'xls')):
                 print("Input file must be a csv, xlsx or xls file.")
@@ -257,7 +261,7 @@ def main():
             while (file_fmt_response is None) or file_fmt_response == '':
                 file_fmt_response = raw_input("Do all the files in the directory have the same format (Y/N)?")
                 file_fmt_response = file_fmt_response.strip()
-            if(file_fmt_response.lower()[0]=='y'):
+            if file_fmt_response.lower()[0] == 'y':
                 print("The same input map will be used to load all the files since they are of the same format.")
                 same_file_formats = True
             try:
