@@ -169,7 +169,7 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
             shutil.move(str(ip_map), str(json_templates_path))
 
     else:
-        print("Processing files with same formats")
+        print("Processing files with different formats")
         # If the files to be loaded are not all in the same format, load them this way
         for file in files_list:
             print("\nFill in data location information for {}".format(pathlib2.Path(file).name))
