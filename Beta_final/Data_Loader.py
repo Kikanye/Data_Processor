@@ -16,7 +16,7 @@ DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
 DEFAULT_UNKNOWN = 'UNKNOWN-'
 
 NO_HEADER_ROW_INDICATOR = 0
-DEFAULT_HEADER_ROW_NUMBER =1
+DEFAULT_HEADER_ROW_NUMBER = 1
 
 
 def handle_csv_input(filename, input_specs):
@@ -160,7 +160,7 @@ def handle_xlsx_input(filename, input_specs):
                     d_frames["time"] = pd.to_datetime(d_frames["time"], errors='coerce')
 
         if ("datetime" in header_names):
-            type_get = d_frames['datetime'].apply(type)
+            type_get = d_frames["datetime"].apply(type)
             type_test = (type_get == datetime.datetime).all()
 
             if not(type_test):
@@ -248,8 +248,10 @@ def handle_xlsx_output(filename, out_list, in_filename, output_specs):
     return saved_path
 
 
-def handle_csv_output():
+def handle_csv_output(filename, outlist, in_filename, output_specs):
     # TODO: Use this function to load  the processed input into a .csv formatted output.
+
+
     return
 
 
@@ -261,6 +263,7 @@ def load_output(dictionary_list, filename, in_filename, output_specs):
     filename_split = fname.split('.')
     if(filename_split[-1]=='xlsx'):
         return_val=handle_xlsx_output(filename, dictionary_list, in_filename, output_specs)
+    #TODO: Haldle csv files here.
     return return_val
 
 
