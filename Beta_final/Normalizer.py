@@ -250,7 +250,7 @@ def normalize(file_name, specs, formats):
     type_dict = {}
     for num in range(len(header_names)):
         type_dict[num] = str
-    dt_frames = pd.read_excel(file_name, names=header_names, converters=type_dict)
+    dt_frames = pd.read_excel(file_name, names=header_names, encoding='utf-8-sig')
     dt_frames = dt_frames.fillna('')
     rows = dt_frames.to_dict('records')
     for row in rows:
@@ -269,14 +269,17 @@ def writerows(filename, row_list, specs):
     with open(specs) as the_specs:
         template_specs = json.load(the_specs)
     row = int(template_specs["header_row"])+1
-    for dict_item in row_list:
+    """for dict_item in row_list:
         for key, value in dict_item.items():
             cell = template_specs["fields"][key]["column_letter"] + str(row)
             wk_sheet[cell] = value
-        row += 1
+        row += 1"""
     parent_dir = pathlib2.Path(f_path.parent)
     save_path = str(parent_dir.joinpath('_normalized'+'-'+fname))
-    workbook.save(save_path)
+    data=pd.DataFrame(row_list)
+    columns_order = template_specs["header_list"]
+    data.to_csv(save_path, columns=columns_order, index=False, encoding='utf-8-sig')
+    #workbook.save(save_path)
     return save_path
 
 
