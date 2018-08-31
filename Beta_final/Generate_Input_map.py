@@ -42,7 +42,7 @@ def get_input(item):
             except ValueError as ve:
                 print(ve)
 
-            return_dict["column"] = col_num
+            return_dict["column"] = int(col_num)
             column_specified = True
 
         elif col == '':
@@ -68,13 +68,26 @@ def get_input(item):
     return return_dict
 
 def handle_headerlist(header_name_list):
+    check_list = []
     std_dict = {"mappings":{}, "header_row":1, "header_list":[], "formats":{}}
     for item in header_name_list:
-        item_info=get_input(item)
-        if(item_info==RESET_VALUE):
-            return item_info
-        column = item_info["column"]
-        fmt = item_info["format"]
+        column = None
+        fmt = None
+        repeated_entry = True
+        while repeated_entry:
+            item_info = get_input(item)
+            if(item_info == RESET_VALUE):
+                return item_info
+
+            column = item_info["column"]
+            fmt = item_info["format"]
+            if (column not in check_list) and (column!=-1):
+                repeated_entry = False
+                check_list.append(column)
+            elif (column==-1):
+                repeated_entry = False
+            else:
+                print('Column entered has already been assigned to another field! Please Input a valid Entry'.upper())
 
         if column != -1:
             std_dict["mappings"][item] = column
