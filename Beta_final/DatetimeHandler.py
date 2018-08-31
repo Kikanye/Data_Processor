@@ -58,6 +58,8 @@ class DatetimeHandler:
         return
 
     def process(self):
+        if (self.time_stamp is not None) and (self.date_time is None):
+            self.date_time = datetime.datetime.utcfromtimestamp(self.time_stamp)
         if self.date_time is not None:
             self.__process_datetime(self.date_time)
         elif (self.date is not None) and (self.time is not None):
@@ -93,7 +95,7 @@ class DatetimeHandler:
             self.date_time = datetime.datetime(day=self.date.day, month=self.date.month,
                                                year=self.date.year, hour=self.time.hour,
                                                minute=self.time.minute, second=self.time.second)
-            self.__process_datetime(self.date_time) # TODO: Confirm that this is not redundant
+            self.__process_datetime(self.date_time)
 
         return
 
