@@ -3,7 +3,6 @@ import configparser
 import time
 
 
-# TODO: Edit all methods in this class so that they have meaningful return values.
 class DatetimeHandler:
     Config = configparser.ConfigParser()
     Config.read("Formats_Settings.ini")
