@@ -2,15 +2,9 @@ import sys
 import os
 import shutil
 import pathlib2
-import json
-import JSON_Template_Generator, Data_Loader, Normalizer, Generate_Input_map
+import JSON_Template_Generator, Normalizer
 import configparser
 import traceback
-import time
-
-#TODO: Line 145 (time.sleep(1.5)) may be removed for increased speed if running at command line,
-#TODO: if that isnt there it causes Pycharm to have faulty print massages
-#TODO: [Error messages will be mixed with information messages].
 
 
 def parse_arguments(arguments):
@@ -124,7 +118,6 @@ def handle_dir_input(dir_path, template_header_number, formats, directories, sam
                 print("\nPROCESSING FAILURE: Processing {} failed".format(file))
                 print(e)
                 traceback.print_exc()
-            time.sleep(1.5) #This will fix the issue of having wierd printing in the wrong places (info inbetween errors)
 
         # Move the files into the right directories after processing.
         template_map = pathlib2.Path(template_map_path)
