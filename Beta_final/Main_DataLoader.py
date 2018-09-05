@@ -6,11 +6,6 @@ import json
 import JSON_Template_Generator, Data_Loader, Generate_Input_map
 import configparser
 import traceback
-import time
-
-#TODO: Line 145 (time.sleep(2)) may be removed for increased speed if running at command line,
-#TODO: if that isnt there it causes Pycharm to have faulty print massages
-#TODO: [Error messages will be mixed with information messages].
 
 
 def parse_arguments(arguments):
@@ -133,7 +128,6 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
                 print("\nPROCESSING FAILURE: Processing {} failed".format(file))
                 print(e)
                 traceback.print_exc()
-            time.sleep(2) #This will fix the issue of having wierd printing in the wrong places (info inbetween errors)
 
         # Move the files into the right directories after processing.
         ip_map = pathlib2.Path(input_map_path)
