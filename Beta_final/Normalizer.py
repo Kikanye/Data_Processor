@@ -278,6 +278,11 @@ def writerows(filename, row_list, specs):
     save_path = str(parent_dir.joinpath('_normalized'+'-'+fname))
     data=pd.DataFrame(row_list)
     columns_order = template_specs["header_list"]
+    save_path_split = save_path.split('.')
+    extension = save_path_split[-1]
+    if (extension.lower()).strip()!='csv':
+        save_path_split[-1]='csv'
+    save_path='.'.join(save_path_split)
     data.to_csv(save_path, columns=columns_order, index=False, encoding='utf-8-sig')
     #workbook.save(save_path)
     return save_path
