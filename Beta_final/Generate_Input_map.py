@@ -117,7 +117,7 @@ def generate_input_map(json_template):
 
     while invalid_header_input:
         header_row = raw_input("\nWhat row in the file contains the column headings?"
-                               " (If nothing is entered it will default to 1)")
+                               " (Enter 0 if the input file has no header row)")
         header_row = header_row.strip()
         try:
             int_test = int(header_row)
