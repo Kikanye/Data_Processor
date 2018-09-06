@@ -263,17 +263,8 @@ def normalize(file_name, specs, formats):
 def writerows(filename, row_list, specs):
     f_path = pathlib2.Path(filename)
     fname = f_path.name
-
-    workbook = openpyxl.load_workbook(filename)
-    wk_sheet = workbook.active
     with open(specs) as the_specs:
         template_specs = json.load(the_specs)
-    row = int(template_specs["header_row"])+1
-    """for dict_item in row_list:
-        for key, value in dict_item.items():
-            cell = template_specs["fields"][key]["column_letter"] + str(row)
-            wk_sheet[cell] = value
-        row += 1"""
     parent_dir = pathlib2.Path(f_path.parent)
     save_path = str(parent_dir.joinpath('_normalized'+'-'+fname))
     data=pd.DataFrame(row_list)
@@ -282,9 +273,8 @@ def writerows(filename, row_list, specs):
     extension = save_path_split[-1]
     if (extension.lower()).strip()!='csv':
         save_path_split[-1]='csv'
-    save_path='.'.join(save_path_split)
+    save_path = '.'.join(save_path_split)
     data.to_csv(save_path, columns=columns_order, index=False, encoding='utf-8-sig')
-    #workbook.save(save_path)
     return save_path
 
 
