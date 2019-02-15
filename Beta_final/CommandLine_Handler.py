@@ -1,8 +1,13 @@
-"""This Script will be used to accept command line arguments needed to run the loader and Normalizer
-(load the data into a template and then normalize consecutively). It calls functions from other scripts
-to make this work. It will parse the arguments and allow the user to run the Data Processor either for a single file,
-or for a directory filled with files into the same template
-(it will produce copies of that template for the different files)."""
+"""
+-> This Script will be used to accept command line arguments needed to run the loader and Normalizer
+(load the data into a template and then normalize consecutively).
+-> It calls functions from other scripts to make this work.
+-> It will parse the arguments and allow the user to run the Data_Processor either for a single file,
+   or for a directory filled with files.
+-> The Data_Processor get the data from the input files and load it into the template argument provided.
+-> A copy of the template will essentially be generated for each input file.
+(it will produce copies of that template for the different files).
+"""
 
 import sys
 import os
@@ -15,17 +20,30 @@ import traceback
 
 
 def parse_arguments(arguments):
-    """This function will take in one parameter which is a list of values passed in from the command line,
-    It returns a dictionary of containing all the arguments with appropriate keys."""
-    arg_dict = {'input': None,'template': None, 'input_map': None, 'template_header': None}
-    if ('=' in arguments[1] or '=' in arguments[2]):
+    """
+    ->'arguments': A list of arguments as gotten from the commandline.
+
+    This function will take in one parameter which is a list of values passed in from the command line,
+    It returns a dictionary of containing all the arguments with appropriate keys.
+    """
+    # Dictionary of arguments to be returned.
+    arg_dict = {'input': None, 'template': None, 'input_map': None, 'template_header': None}
+
+    # Check to ensure that there are no '=' signs in the first 2 arguments. If there are raise Exception.
+    # If not add them to the return dictionary (arg_dict).
+    if ('=' in arguments[1]) or ('=' in arguments[2]):
         raise Exception("Invalid character found in first and/or second argument,\n"
                         "First and/or second arguments must not have '=' signs, must be raw file paths.")
     else:
         arg_dict['input'] = arguments[1].strip()
         arg_dict['template'] = arguments[2].strip()
+
+    # Process the next arguments (starting from the third to the end).
+    # All arguments from here on must be in the form field=value
+    # Raise an exception if an unexpected field is found
+    # Add all valid arguments to the return arguments dictionary.
     for arg in arguments[3:]:
-        if('=' not in arg):
+        if '=' not in arg:
             print("Invalid argument supplied, all arguments except the first and the second must be in the form,"
                   " field=value")
             exit(1)
@@ -41,10 +59,17 @@ def parse_arguments(arguments):
     return arg_dict
 
 
-def handle_file_input(input_file, template_path, template_map_path, formats, directories, input_map_path=None,
-                      move_ip_map=True):
-    """This function loads a file specified into the specified template. It can use an input_map_path passed in,
-     and if not is will generate an input map, by asking u """
+def handle_file_input(input_file, template_path, template_map_path, formats, directories,
+                      input_map_path=None, move_ip_map=True):
+    """
+     ->'input_file': The path to the file from which data to be loaded into the template will be gotten from.
+     ->'template_path': The path to the template file which the data from the 'input_file' will be loaded into
+     ->'template_map_path': The path to the json map file that describes
+     This function will load the contents of a specified input file into a specified template file.
+     It will use the specifications provided in the template_map_path and input_map_path to load the data from the input file into the template file.
+
+     for the fields in the template loads a file specified into the specified template. It can use an input_map_path passed in,
+     and if not is will generate an input map, by asking the user """
 
     # If the input map file was not provided, then ask questions to generate it.
     if (input_map_path==None or input_map_path==''):
