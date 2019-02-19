@@ -64,15 +64,23 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
     """
      ->'input_file': The path to the file from which data to be loaded into the template will be gotten from.
      ->'template_path': The path to the template file which the data from the 'input_file' will be loaded into
-     ->'template_map_path': The path to the json map file that describes
+     ->'template_map_path': The path to the json map file that describes the template file.
+      This is needed for the data processing to occur.
+     ->'formats': A dictionary containing that contains the date and time formats as specified in Formats_Settings.ini
+     ->'directories': A dictionary containing that specifies the folders where the files generated should be stored.
+     ->'input_map_path': Used to specify the path to json map file for which specifies the structure of the input file.
+     ->'move_ip_map': This specifies whether or not to move the input map file into a different directory after
+      processing.
      This function will load the contents of a specified input file into a specified template file.
-     It will use the specifications provided in the template_map_path and input_map_path to load the data from the input file into the template file.
+     It will use the specifications provided in the template_map_path and input_map_path to perform its operations.
 
-     for the fields in the template loads a file specified into the specified template. It can use an input_map_path passed in,
-     and if not is will generate an input map, by asking the user """
+     It can use an input_map_path that will be passed in by the user.
+     If an input map file is not specified, it will question the user and generate the input map by calling a function
+     from the Generate_Input_map script. """
 
     # If the input map file was not provided, then ask questions to generate it.
-    if (input_map_path==None or input_map_path==''):
+    # Make a string for the filename using the name of the input file.
+    if (input_map_path is None) or (input_map_path == ''):
         input_path = pathlib2.Path(input_file)
         input_fname = input_path.name
         input_fname_split = input_fname.split('.')
@@ -83,23 +91,26 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
         with open(input_map_path, "w") as data_file:
             json.dump(data, data_file, indent=2)
 
-    # Load the template with the data from the input file and normalize it.
+    # Transfer the data from the input file into the template
+    # Generate a normalized list of dictionaries each representing a row of data.
+    # Load the normalized data into the template.
     loaded_data_path = Data_Loader.transfer_values(input_file, template_path, input_map_path, template_map_path)
     row_list = Normalizer.normalize(loaded_data_path, template_map_path, formats)
     normalized_path = Normalizer.writerows(loaded_data_path, row_list, template_map_path)
 
-    # Move the processing files into the right directories
+    # Move the processed files into the directories specified by the 'directories' argument.
     loaded_data_path_obj = pathlib2.Path(loaded_data_path)
     loaded_data_parent = loaded_data_path_obj.parent
-    loaded_data_destination =(loaded_data_parent.joinpath(directories["outputs"])).joinpath(directories['loaded'])
+    loaded_data_destination = (loaded_data_parent.joinpath(directories["outputs"])).joinpath(directories['loaded'])
     print("Moving loaded data file into new directory")
-    if ((loaded_data_destination.joinpath(loaded_data_path_obj.name)).exists()):
+    # Handle the situation where the files already exist in the target directories by asking the user what to do.
+    if (loaded_data_destination.joinpath(loaded_data_path_obj.name)).exists():
         print("\nA file with name {} already exists in the destination path provided to move."
               .format(loaded_data_path_obj.name))
-        response=raw_input("Would you like to replace the file with the newly processed one? (Y/N)")
+        response = raw_input("Would you like to replace the file with the newly processed one? (Y/N)")
+
         if response.lower() == 'y':
             os.remove(str(loaded_data_destination.joinpath(loaded_data_path_obj.name)))
-
             shutil.move(loaded_data_path, str(loaded_data_destination))
     else:
         shutil.move(loaded_data_path, str(loaded_data_destination))
@@ -109,24 +120,24 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
     normalized_data_destination = (normalized_path_parent.joinpath(directories["outputs"])).\
         joinpath(directories['normalized'])
     print("Moving Normalized data file into new directory.")
-    if((normalized_data_destination.joinpath(normalized_path_obj.name)).exists()):
+    if (normalized_data_destination.joinpath(normalized_path_obj.name)).exists():
         print("\nA file with name {} already exists in the destination path provided to move."
               .format(normalized_path_obj.name))
-        response=raw_input("Would you like to replace the file with the newly processed one? (Y/N)")
+        response = raw_input("Would you like to replace the file with the newly processed one? (Y/N)")
         if response.lower() == 'y':
             os.remove(str(normalized_data_destination.joinpath(normalized_path_obj.name)))
             shutil.move(normalized_path, str(normalized_data_destination))
     else:
         shutil.move(normalized_path, str(normalized_data_destination))
 
-    # If the input map file is to be moved (all files are not he same format), then do so.
+    # If the input map file is to be moved (which means that all files are not the same format), then do so.
     if move_ip_map:
         ip_map = pathlib2.Path(input_map_path)
         ip_parent = ip_map.parent
         print("Making directory for json maps. ")
         json_templates_path = ip_parent.joinpath(directories['json_maps'])
         print("Moving json maps data file into new directory.")
-        if((json_templates_path.joinpath(ip_map.name)).exists()):
+        if (json_templates_path.joinpath(ip_map.name)).exists():
             print("\nA file with name {} already exists in the destination path provided to move, move not possible."
                   .format(ip_map.name))
             response = raw_input("Would you like to replace the file with the newly processed one? (Y/N)")
@@ -141,7 +152,22 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
 
 def handle_dir_input(dir_path, template_path, template_map_path, formats, directories, same_file_formats,
                      input_map_path=None):
-    """This function takes in a directory and loads all the files in that directory into the specified template."""
+    """
+     ->'dir_path': The path to the directory containing all the files which need to be processed.
+     ->'template_path': The path to the template file which the data from the 'input_file' will be loaded into
+     ->'template_map_path': The path to the json map file that describes the template file.
+      This is needed for the data processing to occur.
+     ->'formats': A dictionary containing that contains the date and time formats as specified in Formats_Settings.ini
+     ->'directories': A dictionary containing that specifies the folders where the files generated should be stored.
+     ->'input_map_path': Used to specify the path to json map file for which specifies the structure of the input file.
+     ->'move_ip_map': This specifies whether or not to move the input map file into a different directory after
+      processing.
+     This function will load the contents of a specified input file into a specified template file.
+     It will use the specifications provided in the template_map_path and input_map_path to perform its operations.
+
+     It can use an input_map_path that will be passed in by the user.
+     If an input map file is not specified, it will question the user and generate the input map by calling a function
+     from the Generate_Input_map script. """
 
     # Get all the names of the files to be loaded and put them into a list.
     files_list = []
