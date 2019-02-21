@@ -1,62 +1,87 @@
-"""This script will get data from a specified spreadsheet and load it into a specified output sheet.
-   This script will use a .ini file which will have """
-import csv
+"""
+This script contains functions that will help with the process of getting data from an input source file and loading
+it into a specified template file.
+
+Functions from this script are called by the scripts which setup the variables needed for this to work.
+"""
+
 import openpyxl, configparser
 import json
 import datetime
 import pandas as pd
 import pathlib2
 
+# Open file which contains the formats for the date/time and load them into variables.
 Config = configparser.ConfigParser()
 Config.read("Formats_Settings.ini")
 
 DEFAULT_DATE_FORMAT = Config.get('DATALOADER_FORMATS', 'date')
 DEFAULT_DATETIME_FORMAT = Config.get('DATALOADER_FORMATS', 'datetime')
 DEFAULT_TIME_FORMAT = Config.get('DATALOADER_FORMATS', 'time')
-DEFAULT_UNKNOWN = 'UNKNOWN-'
+DEFAULT_UNKNOWN = 'UNKNOWN-'  # This string will be used as the default header for columns.
 
-NO_HEADER_ROW_INDICATOR = 0
-DEFAULT_HEADER_ROW_NUMBER = 1
+NO_HEADER_ROW_INDICATOR = 0  # Use this if there is no header row in the file.
+DEFAULT_HEADER_ROW_NUMBER = 1  # The default row to use as the header row.
 
 
 def handle_csv_input(filename, input_specs):
+    """
+    ->'filename': The path to the file that needs to be processed.
+    ->'input_specs': The path to the json map file for the file that needs to be processed.
+    This function will process the contents of 'filename' using the json specification in 'input_specs'.
+     It will read in the contents into a dataframe and return a list of dictionaries,
+    where each dictionary represents a row from the original data file.
+    """
+
+    # Open and read the contents of the json file into a variable.
     with open(input_specs) as j_maps:
-        test_dict = json.load(j_maps)
-    data=None
-    file_header_column = int(test_dict['header_row'])
+        map_dict = json.load(j_maps)
+
+    # Get the specification for which row contains the headings in the file
+    data = None
+    file_header_column = int(map_dict['header_row'])
+    # Decide how to read in the file based on the header specification.
     if file_header_column <= NO_HEADER_ROW_INDICATOR:
         data = pd.read_csv(filename, header=None)
     elif file_header_column == 1:
         data = pd.read_csv(filename)
     elif file_header_column > 1:
+        # If the header row is not the first, do this
         data = pd.read_csv(filename, header=file_header_column-1)
 
+    # Get the number of rows and columns and generate a list containing default header names.
     rows, cols = data.shape
     header_names = [DEFAULT_UNKNOWN]*cols
 
+    # Change the default header names to the actual header names as specified in the json specification data.
     count = 0
     for item in header_names:
         header_names[count] = item+str(count)
         count += 1
-    for key, value in test_dict['mappings'].items():
-        if(value>cols):
+    for key, value in map_dict['mappings'].items():
+        if value > cols:
             print(" \nThe field {} was specified to be at {}, but this is out of the range in the input file.".
                   format(key, value))
         else:
             header_names[int(value)-1] = key
     data.columns = header_names
 
-    formats={}
-    formats_present=False
-    if(test_dict.has_key("formats")):
-        formats = test_dict["formats"]
-        if(bool(formats)):
+    # Check to see if formats are present and generate a boolean value that says so.
+    formats = {}
+    formats_present = False
+    if "formats" in map_dict:
+        formats = map_dict["formats"]
+        if bool(formats):
+            # TODO: This boolean value here may be redundant
             formats_present = True
 
     # TODO: Consider making this more modular, instead of using the "dates", "time" and "datetime" as the keys.
-    if ("date" in header_names):
-        if ((formats_present)and formats.has_key("date")):
-            date_format=formats["date"]
+
+    # Check to see if the data/time and/or datetime columns are available and process them
+    # If the formats for the dates and times are specified, use that else try to infer the format.
+    if "date" in header_names:
+        if formats_present and "date" in formats:
+            date_format = formats["date"]
             try:
                 data["date"] = pd.to_datetime(data["date"], format=date_format)
             except Exception as e:
@@ -65,8 +90,9 @@ def handle_csv_input(filename, input_specs):
                 data["date"] = pd.to_datetime(data["date"])
         else:
             data["date"] = pd.to_datetime(data["date"])
-    if ("time" in header_names):
-        if ((formats_present)and formats.has_key("time")):
+
+    if "time" in header_names:
+        if formats_present and "time" in formats:
             time_format = formats["time"]
             try:
                 data["time"] = pd.to_datetime(data["time"], format=time_format)
@@ -77,8 +103,8 @@ def handle_csv_input(filename, input_specs):
         else:
             data["time"] = pd.to_datetime(data["time"])
 
-    if ("datetime" in header_names):
-        if ((formats_present)and formats.has_key("datetime")):
+    if "datetime" in header_names:
+        if formats_present and "datetime" in formats:
             datetime_format = formats["datetime"]
             try:
                 data["datetime"] = pd.to_datetime(data["datetime"], format=datetime_format)
@@ -89,7 +115,8 @@ def handle_csv_input(filename, input_specs):
                 data["datetime"] = pd.to_datetime(data["datetime"])
         else:
             data["datetime"] = pd.to_datetime(data["datetime"])
-    data=data.where(pd.notnull(data), None)
+    # Change null values to None and then convert the dataframe to a list of dictionaries and return.
+    data = data.where(pd.notnull(data), None)
     data_list = data.to_dict('records')
     return data_list
 
