@@ -26,11 +26,13 @@ DEFAULT_HEADER_ROW_NUMBER = 1  # The default row to use as the header row.
 
 def handle_csv_input(filename, input_specs):
     """
-    ->'filename': The path to the file that needs to be processed.
-    ->'input_specs': The path to the json map file for the file that needs to be processed.
-    This function will process the contents of 'filename' using the json specification in 'input_specs'.
-     It will read in the contents into a dataframe and return a list of dictionaries,
-    where each dictionary represents a row from the original data file.
+    :param filename: The path to the .csv file that needs to be processed.
+    :param input_specs: The path to the json map file for the file that needs to be processed.
+    :return: A list of dictionaries, where each dictionary represents a row from the original data file
+
+    This function will process the contents of 'filename' (which must be a .csv file).
+    It will use the json specifications in 'input_specs'.
+    It will read in the contents into a dataframe and process them into a list of dictionaries.
     """
 
     # Open and read the contents of the json file into a variable.
@@ -122,6 +124,18 @@ def handle_csv_input(filename, input_specs):
 
 
 def handle_xlsx_input(filename, input_specs):
+    """
+
+    :param filename: The path to the excel file which needs to be processed.
+    :param input_specs: The path to the json map for the input file that needs to be processed.
+    :return: A list of dictionaries where each dictionary represents a row from the input file being processed.
+
+    This function will process the contents of 'filename' (which must be an excel file).
+    It will use the json specifications in 'input_specs'.
+    It will read in the contents into a dataframe and process them into a list of dictionaries.
+    """
+
+    # Open and read the contents of the json specification file.
     with open(input_specs) as j_maps:
         test_dict = json.load(j_maps)
     d_frames=None

@@ -21,7 +21,8 @@ import traceback
 
 def parse_arguments(arguments):
     """
-    ->'arguments': A list of arguments as gotten from the commandline.
+    :param arguments: A list of arguments as gotten from the commandline.
+    :return: A dictionary of containing all the arguments with appropriate keys.
 
     This function will take in one parameter which is a list of values passed in from the command line,
     It returns a dictionary of containing all the arguments with appropriate keys.
@@ -116,21 +117,25 @@ def handle_file_movement(file_to_move_path, destination):
 def handle_file_input(input_file, template_path, template_map_path, formats, directories,
                       input_map_path=None, move_ip_map=True):
     """
-     ->'input_file': The path to the file from which data to be loaded into the template will be gotten from.
-     ->'template_path': The path to the template file which the data from the 'input_file' will be loaded into
-     ->'template_map_path': The path to the json map file that describes the template file.
-      This is needed for the data processing to occur.
-     ->'formats': A dictionary containing that contains the date and time formats as specified in Formats_Settings.ini
-     ->'directories': A dictionary containing that specifies the folders where the files generated should be stored.
-     ->'input_map_path': Used to specify the path to json map file for which specifies the structure of the input file.
-     ->'move_ip_map': This specifies whether or not to move the input map file into a different directory after
-      processing.
-     This function will load the contents of a specified input file into a specified template file.
-     It will use the specifications provided in the template_map_path and input_map_path to perform its operations.
+    :param input_file: The path to the file from which data to be loaded into the template will be gotten from.
+    :param template_path: The path to the template file which the data from the 'input_file' will be loaded into.
+    :param template_map_path: The path to the json map file that describes the template file.
+                              This is needed for the data processing to occur.
+    :param formats: A dictionary containing that contains the date and time formats as specified in Formats_Settings.ini
+    :param directories: A dictionary containing that specifies the folders where the files generated should be stored.
+    :param input_map_path: Used to specify the path to json map file for which specifies the structure of the input
+                           file.
+    :param move_ip_map: This specifies whether or not to move the input map file into a different directory after
+    processing.
+    :return: None
 
-     It can use an input_map_path that will be passed in by the user.
-     If an input map file is not specified, it will question the user and generate the input map by calling a function
-     from the Generate_Input_map script. """
+    This function will load the contents of a specified input file into a specified template file.
+    It will use the specifications provided in the template_map_path and input_map_path to perform its operations.
+
+    It can use an input_map_path that will be passed in by the user.
+    If an input map file is not specified, it will question the user and generate the input map by calling a function
+    from the Generate_Input_map script.
+    """
 
     # If the input map file was not provided, then ask questions to generate it.
     # Make a string for the filename using the name of the input file.
@@ -207,21 +212,28 @@ def handle_file_input(input_file, template_path, template_map_path, formats, dir
 def handle_dir_input(dir_path, template_path, template_map_path, formats, directories, same_file_formats,
                      input_map_path=None):
     """
-     ->'dir_path': The path to the directory containing all the files which need to be processed.
-     ->'template_path': The path to the template file which the data from the 'input_file' will be loaded into
-     ->'template_map_path': The path to the json map file that describes the template file.
+    :param dir_path: The path to the directory containing all the files which need to be processed.
+    :param template_path: The path to the template file which the data from the 'input_file' will be loaded into.
+    :param template_map_path: The path to the json map file that describes the template file.
       This is needed for the data processing to occur.
-     ->'formats': A dictionary containing that contains the date and time formats as specified in Formats_Settings.ini
-     ->'directories': A dictionary containing that specifies the folders where the files generated should be stored.
-     ->'input_map_path': Used to specify the path to json map file for which specifies the structure of the input file.
-     ->'move_ip_map': This specifies whether or not to move the input map file into a different directory after
-      processing.
-     This function will load the contents of a specified input file into a specified template file.
-     It will use the specifications provided in the template_map_path and input_map_path to perform its operations.
+    :param formats: A dictionary containing that contains the date and time formats as specified in
+     "Formats_Settings.ini".
+    :param directories: A dictionary containing that specifies the folders where the files generated should be stored.
+    :param same_file_formats: This argument specifies whether or not all the files in the directory are of the same
+     format.
+    :param input_map_path: Used to specify the path to json map file for which specifies the structure of the input
+    file.
+    :return: None
+
+    This function will load the contents of a bunch of files in the directory specified by 'dir_path' into a specified
+    template.
+    It will generate a copy of the template for each file in the directory.
+    It will use the specifications provided in the template_map_path and input_map_path to perform its operations.
 
      It can use an input_map_path that will be passed in by the user.
-     If an input map file is not specified, it will question the user and generate the input map by calling a function
-     from the Generate_Input_map script. """
+     If an "input map file" is not specified, it will question the user and generate the input map by calling a function
+     from the "Generate_Input_map" script.
+    """
 
     # Get all the names of the files to be loaded and put them into a list.
     files_list = []
@@ -289,16 +301,19 @@ def handle_dir_input(dir_path, template_path, template_map_path, formats, direct
 
 
 def main():
-    """This gets all the settings for the formats from the 'Formats_Settings.ini' file.
-       It gets the arguments and parses them using the 'parse_arguments(arguments)' function above.
-       It makes directories where the different kinds of files generated by running this code will be stored,
-       (if they do not already exist).
+    """
+    :return: None
+    This gets all the settings for the formats from the 'Formats_Settings.ini' file.
+    It gets the arguments and parses them using the 'parse_arguments(arguments)' function above.
+    It makes directories where the different kinds of files generated by running this code will be stored,
+    (if they do not already exist).
 
-       It will call functions from the Template Generator script and from the Input map Generator.
-       It will use these functions script to make the JSON maps needed to function,
-        and call the one of the functions above to handle directory input
-        or handle file input depending on the arguments that are passed in.
-       """
+    It will call functions from the Template Generator script and from the Input map Generator.
+    It will use these functions script to make the JSON maps needed to function,
+    and call the one of the functions above to handle directory input
+    or handle file input depending on the arguments that are passed in.
+    """
+
     Config = configparser.ConfigParser()
     Config.read('Formats_Settings.ini')
 
