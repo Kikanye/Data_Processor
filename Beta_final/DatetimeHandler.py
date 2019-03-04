@@ -1,22 +1,32 @@
+"""This script is used to handle date/time conversions. Each instance variable represents a date or time fields.
+    It works using a DatetimeHandler class which will """
+
 import datetime
 import configparser
 import time
 
 
 class DatetimeHandler:
+    """This class will handle the conversion of date and/or time fields.
+       It uses the formats specified in 'Formats_Settings.ini'."""
+
+    # Read the settings file into a variable
     Config = configparser.ConfigParser()
     Config.read("Formats_Settings.ini")
 
+    # Get the formats for date, time and datetime.
     process_date_format = Config.get('NORMALIZE_FORMATS', 'date')
     process_datetime_format = Config.get('NORMALIZE_FORMATS', 'datetime')
     process_time_format = Config.get('NORMALIZE_FORMATS', 'time')
 
+    # Set constants needed for conversions.
     SECONDS_IN_DAY = 24.0*60.0*60.0
     HOURS_TO_MIN = 60.0
     MINS_TO_SECS = 60.0
     HOURS_TO_SECONDS = HOURS_TO_MIN*MINS_TO_SECS
 
     def __init__(self):
+        """Constructor for setting instance variables to None. """
         self.date_time = None
         self.date = None
         self.time = None
@@ -32,6 +42,17 @@ class DatetimeHandler:
         self.time_stamp = None
 
     def __calculate_part_day(self, hours, minutes=0.0, seconds=0.0):
+        """
+
+        :param hours: Hours in the time (24 hour representation)
+        :param minutes: Minutes in the time
+        :param seconds: The seconds in the time
+        :return: The part day representation of the of time.
+
+        Part day is calculated by dividing the the number of seconds that have gone by at the specified time by the number of seconds in the day.
+        That is part_day represents what fraction of the day has gone by at the specified time.
+        The formula used is part_day=(1/(24*60*60))*((hours*60*60)+(minutes*60)+(seconds))
+        """
         part_day = None
         if hours is not None:
             coeff = 1.0/DatetimeHandler.SECONDS_IN_DAY
@@ -41,6 +62,14 @@ class DatetimeHandler:
         return part_day
 
     def __process_datetime(self, dt_time):
+        """
+
+        :param dt_time: The datetime variable to be processed
+        :return: None
+
+        This function processes the datetime 'dt_time' and loads the fields for the instance variables as needed.
+        """
+
         self.date = dt_time.date()
         self.time = dt_time.time()
         self.day = dt_time.day
@@ -57,6 +86,16 @@ class DatetimeHandler:
         return
 
     def process(self):
+        """
+
+        :return: None
+
+        This function will process the date/time values provided.
+         It will set the instance variables that can be generated from the date/time fields which it gets.
+         It will check which date/time fields it has been provided and set the values for the other fields if possible.
+        """
+
+        # Check for
         if (self.time_stamp is not None) and (self.date_time is None):
             self.date_time = datetime.datetime.utcfromtimestamp(self.time_stamp)
         if self.date_time is not None:
