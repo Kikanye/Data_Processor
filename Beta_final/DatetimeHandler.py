@@ -91,44 +91,55 @@ class DatetimeHandler:
         :return: None
 
         This function will process the date/time values provided.
-         It will set the instance variables that can be generated from the date/time fields which it gets.
-         It will check which date/time fields it has been provided and set the values for the other fields if possible.
+        It will set the instance variables that can be generated from the date/time fields which it gets.
+        It will check which date/time fields it has been provided and set the values for the other fields if possible.
+        This function will call __process_datetime function will get all the values for the variables from the datetime
+        if it is available.
         """
 
-        # Check for
+        # Give unix timestamp priority over all all other time fields when generating the values.
+        # If there is a unix timestamp, get the datetime from that and use that to get the other fields.
         if (self.time_stamp is not None) and (self.date_time is None):
             self.date_time = datetime.datetime.utcfromtimestamp(self.time_stamp)
         if self.date_time is not None:
             self.__process_datetime(self.date_time)
+        # If the date and the time are available, make the datetime from them and process
         elif (self.date is not None) and (self.time is not None):
             self.date_time = datetime.datetime(day=self.date.day, month=self.date.month, year=self.date.year,
                                                hour=self.time.hour, minute=self.time.minute, second=self.time.second)
             self.__process_datetime(self.date_time)
+        # If the date is available get all the possible fields from that
         elif self.date is not None:
             self.day = self.date.day
             self.month = self.date.month
             self.year = self.date.year
+        # This is used to get the julian_day from the date
             self.julian_day = int(self.date.strftime("%j"))
+        # If the time is available, get all the possible fields from that.
         elif self.time is not None:
             self.hour = self.time.hour
             self.minute = self.time.minute
             self.seconds = self.time.second
             self.am_pm = self.time.strftime("%p")
+        # Calculate the part day is the time is provided.
             self.part_day = self.__calculate_part_day(self.time.hour, self.time.minute, self.time.second)
+        # If day, month and year are available and there is no date. Generate the date and julian day using them.
         if (self.day is not None) and (self.month is not None) and (self.year is not None) and(self.date is None):
             self.date = datetime.date(day=int(self.day), month=int(self.month), year=int(self.year))
             self.julian_day = int(self.date.strftime("%j"))
-
+        # If hour, minute and seconds are available and there is no time. Generate the time from that and
+        # calculate the part day.
         if (self.hour is not None) and (self.minute is not None) and (self.seconds is not None) and (self.time is None):
-            self.time=datetime.time(hour=int(self.hour), minute=int(self.minute), second=int(self.seconds))
+            self.time = datetime.time(hour=int(self.hour), minute=int(self.minute), second=int(self.seconds))
             self.am_pm = self.time.strftime("%p")
             self.part_day = self.__calculate_part_day(self.time.hour, self.time.minute, self.time.second)
-
+        # If hour, minute are available, but no seconds, generate the time with them without the seconds.
         if (self.hour is not None) and (self.minute is not None) and (self.seconds is None):
-            self.time=datetime.time(hour=int(self.hour), minute=int(self.minute))
+            self.time = datetime.time(hour=int(self.hour), minute=int(self.minute))
             self.am_pm = self.time.strftime("%p")
             self.part_day = self.__calculate_part_day(self.time.hour, self.time.minute, self.time.second)
-
+        # If the date and time are available generate the datetime and process it.
+        # This is done again after all other processing is done.
         if (self.date is not None) and (self.time is not None):
             self.date_time = datetime.datetime(day=self.date.day, month=self.date.month,
                                                year=self.date.year, hour=self.time.hour,
@@ -138,15 +149,18 @@ class DatetimeHandler:
         return
 
     def input_time(self, datetime_time=None, time_string=None, str_format=None, hour=None, minute=None, seconds=None):
+        """
+        Function currently not being used.
+        """
         if (datetime_time is not None) and (type(datetime_time) == datetime.time):
             self.time = datetime_time
         elif (time_string is not None) and (type(time_string) == str):
             if str_format is None:
                 print("Format not specified, will attempt to use default format {}".
                       format(DatetimeHandler.process_time_format))
-                str_format=DatetimeHandler.process_time_format
+                str_format = DatetimeHandler.process_time_format
                 try:
-                    the_time=datetime.datetime.strptime(time_string, str_format)
+                    the_time = datetime.datetime.strptime(time_string, str_format)
                     self.time = the_time.time()
                     print("Success in attempt to use default format.")
                 except Exception as e:
@@ -162,16 +176,18 @@ class DatetimeHandler:
         return
 
     def input_date(self, datetime_date=None, date_string=None, str_format=None, day=None, month=None, year=None):
-
+        """
+        Function currently not being used.
+        """
         if (datetime_date is not None) and (type(datetime_date) == datetime.date):
-            self.date=datetime_date
+            self.date = datetime_date
         elif (date_string is not None) and (type(date_string) == str):
             if str_format is None:
                 print("Format not specified, will attempt to use default format {}".
                       format(DatetimeHandler.process_date_format))
-                str_format=DatetimeHandler.process_date_format
+                str_format = DatetimeHandler.process_date_format
                 try:
-                    the_date=datetime.datetime.strptime(date_string, str_format)
+                    the_date = datetime.datetime.strptime(date_string, str_format)
                     self.date = the_date.date()
                     print("Success in attempt to use default format.")
                 except Exception as e:
@@ -181,12 +197,19 @@ class DatetimeHandler:
                 the_date = datetime.datetime.strptime(date_string, str_format)
                 self.date = the_date.date()
         elif (day is not None) and (month is not None) and (year is not None):
-            the_date=datetime.date(year=year, month=month, day=day)
-            self.date=the_date
+            the_date = datetime.date(year=year, month=month, day=day)
+            self.date = the_date
         return
 
     def get_datetime(self, str_format=None):
-        datetime_string=None
+        """
+
+        :param str_format: The format string for the datetime module to use to generate the string for the datetime.
+        :return: A string representation of the datetime.
+
+        Check if the datetime exists, if it does format it using 'str_format', if not return 'None'.
+        """
+        datetime_string = None
         if self.date_time is not None:
             if str_format is None:
                 datetime_string = self.date_time.strftime(DatetimeHandler.process_datetime_format)
@@ -195,64 +218,79 @@ class DatetimeHandler:
         return datetime_string
 
     def get_date(self, str_format=None):
-        date_string=None
+        """
+
+        :param str_format: The format string for the datetime module to use to generate the string for the date.
+        :return: A string representation of the date.
+
+        Check if the date exists, if it does format it using 'str_format', if not return 'None'.
+        """
+        date_string = None
         if self.date is not None:
             if str_format is None:
                 date_string = self.date.strftime(DatetimeHandler.process_date_format)
             else:
-                date_string=self.date.strftime(str_format)
+                date_string = self.date.strftime(str_format)
         return date_string
 
+    def get_time(self, str_format=None):
+        """
+
+        :param str_format: The format string for the datetime module to use to generate the string for the time.
+        :return: A string representation of the time.
+
+        Check if the time exists, if it does format it using 'str_format', if not return 'None'.
+        """
+        time_string = None
+        if self.time is not None:
+            if str_format is None:
+                time_string = self.time.strftime(DatetimeHandler.process_time_format)
+            else:
+                time_string = self.time.strftime(str_format)
+        return time_string
+
+    """The functions below here check and return the variable if it exists, else it returns 'None'"""
     def get_year(self):
-        year=None
+        year = None
         if self.year is not None:
             year = self.year
         return year
 
     def get_day(self):
-        day=None
+        day = None
         if self.year is not None:
             day = self.day
         return day
 
     def get_month(self):
-        month=None
+        month = None
         if self.month is not None:
             month = self.month
         return month
 
     def get_am_pm(self):
-        am_pm=None
+        am_pm = None
         if self.am_pm is not None:
             am_pm = self.am_pm
         return am_pm
 
     def get_hour(self):
-        hour=None
+        hour = None
         if self.hour is not None:
             hour = self.hour
         return hour
 
     def get_minute(self):
-        minute=None
+        minute = None
         if self.minute is not None:
-            minute= self.minute
+            minute = self.minute
         return minute
 
     def get_seconds(self):
-        seconds=None
+        seconds = None
         if self.seconds is not None:
             seconds = self.seconds
         return seconds
-
-    def get_time(self, str_format=None):
-        time_string=None
-        if self.time is not None:
-            if str_format is None:
-                time_string=self.time.strftime(DatetimeHandler.process_time_format)
-            else:
-                time_string=self.time.strftime(str_format)
-        return time_string
 
     def get_julian_day(self):
         julian_day_str = None
