@@ -105,7 +105,7 @@ class GeoHandler:
             elif lat_or_long == GeoHandler.LONGITUDE:
                 if self.long_ew is None:
                     self. long_ew = GeoHandler.GEO_WEST
-            degrees_decimal_signed = -1 * degrees_decimal_signed # Make it positive so that it can be converted.
+            degrees_decimal_signed = -1 * degrees_decimal_signed  # Make it positive so that it can be converted.
         # if it is a positive value do this
         else:
             # if it is positive and it is a latitude then the cardinal point is North.
@@ -129,37 +129,57 @@ class GeoHandler:
 
         return (return_val_dict, return_val_string)
 
-    def __deg_min_sec_dict_to_signed_deg_decimal(self, degrees_minutes_seconds, cardinal_point):
+    def __deg_min_sec_dict_to_signed_deg_decimal(self, degrees_minutes_seconds_dict, cardinal_point):
+        # TODO: Should probably remove the second value being returned by this function.
+        # '__deg_min_sec_dict_to_deg_min_sec_string' returns the same thing... I think
         """
 
-        :param degrees_minutes_seconds: A longitude or latitude value represented as a dictionary
-        :param cardinal_point: The cardinal direction of the degrees_minutes_seconds value
+        :param degrees_minutes_seconds_dict: A longitude or latitude value represented as a dictionary
+                                             in degrees, minutes, seconds format.
+        :param cardinal_point: The cardinal direction of the degrees_minutes_seconds_dict value
         :return: A tuple with two values:
+            -> 1. decimal_return_val: The degrees decimal representation of the longitude or latitude value
+                                      represented by degrees_minutes_seconds.
+            -> 2. degrees_minutes_seconds_return_val: The degrees, minutes, seconds string representation of
+                                                      the longitude or latitude value represented by
+                                                      degrees_minutes_seconds.
+
+        This function will process 'degrees_minutes_seconds_dict' and return the degrees decimal representation for it
+        and the degrees,minutes,seconds string representation as well.
 
         """
-        degrees = degrees_minutes_seconds['deg']
-        minutes = degrees_minutes_seconds['min']
-        seconds = degrees_minutes_seconds['sec']
+        # Get the values from the function arguments
+        degrees = degrees_minutes_seconds_dict['deg']
+        minutes = degrees_minutes_seconds_dict['min']
+        seconds = degrees_minutes_seconds_dict['sec']
         decimal_return_val = None
         degrees_minutes_seconds_return_val = None
         cardinal = ((str(cardinal_point)).lower()).strip()
 
+        # If there is no degrees part or no minutes part return None.
         if (degrees is None) or (minutes is None):
             return (decimal_return_val, degrees_minutes_seconds_return_val)
         else:
+            # If the seconds part is missing, process it this way
             if seconds is None:
+                # Conversion from degrees, minutes, seconds to degrees decimal using;
+                #  with the specified number of decimal places
                 decimal_return_val = degrees+(minutes/60)
                 decimal_return_val = round(decimal_return_val, GeoHandler.DECIMAL_PLACES)
                 if (cardinal == 's') or (cardinal == 'w'):
+                    # If south or west, then it is a negative value
                     decimal_return_val = -1*decimal_return_val
+
+                # Generate the string representation for the degrees, minutes seconds value.
                 temp = str(minutes)
                 temp_split = temp.split('.')
                 decimal_part = float('0.'+temp_split[-1])
                 seconds = decimal_part*60
                 seconds = round(seconds, GeoHandler.DECIMAL_PLACES)
-                degrees_minutes_seconds_return_val = str(int(degrees)) + "°" + str(int(minutes)) + "'" +\
-                                                     str(seconds)+'"'
+                degrees_minutes_seconds_return_val = str(int(degrees)) + "°" + str(int(minutes)) + "'" \
+                                                     + str(seconds) + '"'
             else:
+                # If the seconds is specified, process this way.
                 decimal_return_val = degrees+(minutes/60)+(seconds/3600)
                 decimal_return_val = round(decimal_return_val, GeoHandler.DECIMAL_PLACES)
                 degrees_minutes_seconds_return_val = str(int(degrees)) + "°" + str(int(minutes)) + "'" \
@@ -168,15 +188,25 @@ class GeoHandler:
         return (decimal_return_val, degrees_minutes_seconds_return_val)
 
     def __deg_min_sec_dict_to_deg_min_sec_string(self, degrees_minutes_seconds):
+        """
+
+        :param degrees_minutes_seconds: A longitude or latitude value represented as a dictionary
+                                        in degrees, minutes, seconds format.
+        :return: A string representing 'degrees_minutes_seconds' in the format X°Y'Z",
+                                        where X,Y,Z are float numbers which may be different.
+
+        This function will process the dictionary representation of the degrees, minutes, seconds into a string.
+        """
         degrees = degrees_minutes_seconds['deg']
         minutes = degrees_minutes_seconds['min']
         seconds = degrees_minutes_seconds['sec']
 
         degrees_minutes_seconds_string = None
-
+        # If the degrees is missing or the minutes field is missing return None.
         if (degrees is None) or (minutes is None):
             return degrees_minutes_seconds_string
         else:
+            # If the seconds field is missing process it this way
             if seconds is None:
                 temp = str(minutes)
                 temp_split = temp.split('.')
@@ -192,29 +222,60 @@ class GeoHandler:
         return degrees_minutes_seconds_string
 
     def process(self):
+        """
+
+        :return: None
+
+        This function will use the functions above it as helpers and generate the different formats possible for
+        longitude and latitude values, and save them to the instance variables.
+        """
+
+        # If the degrees decimal longitude value is present and the degrees, minutes, seconds longitude is not present,
+        #  generate the degrees, minutes, seconds value as a string and in the dictionary representation,
+        #  and assign them to their respective instance variables.
         if (self.longitude_signed_decimal is not None) and (self.longitude_deg_min_sec_dict is None):
             return_val = self.__signed_deg_decimal_to_deg_min_sec(self.longitude_signed_decimal, GeoHandler.LONGITUDE)
             self.longitude_deg_min_sec_dict, self.longitude_deg_min_sec = return_val
+        # If the degrees decimal latitude value is present and the degrees, minutes, seconds latitude is not present,
+        #  generate the degrees, minutes, seconds value as a string and in the dictionary representation,
+        #  and assign them to their respective instance variables.
         if (self.latitude_signed_decimal is not None) and (self.latitude_deg_min_sec_dict is None):
             return_val = self.__signed_deg_decimal_to_deg_min_sec(self.latitude_signed_decimal, GeoHandler.LATITUDE)
             self.latitude_deg_min_sec_dict, self.latitude_deg_min_sec = return_val
+        # If the degrees,minutes,seconds dictionary representation for the latitude is present,
+        # and the degrees decimal latitude value is not present, then generate the degrees decimal value
+        # and the string representation of the latitude in degrees, minutes, seconds,
+        # and assign them to their respective instance variables.
         if (self.latitude_deg_min_sec_dict is not None) and (self.latitude_signed_decimal is None):
             return_val = self.__deg_min_sec_dict_to_signed_deg_decimal(self.latitude_deg_min_sec_dict, self.lat_ns)
             self.latitude_signed_decimal, self.latitude_deg_min_sec = return_val
+        # If the degrees,minutes,seconds dictionary representation for the longitude is present,
+        # and the degrees decimal longitude value is not present, then generate the degrees decimal value
+        # and the string representation of the longitude in degrees, minutes, seconds,
+        # and assign them to their respective instance variables.
         if (self.longitude_deg_min_sec_dict is not None) and (self.longitude_signed_decimal is None):
             return_val = self.__deg_min_sec_dict_to_signed_deg_decimal(self.longitude_deg_min_sec_dict, self.long_ew)
             self.longitude_signed_decimal, self.longitude_deg_min_sec = return_val
+        # If the degrees,minutes,seconds dictionary representation for the longitude is present,
+        # and the degrees,minutes,seconds string representation of the longitude value is not present,
+        # then generate the string representation of the longitude in degrees, minutes, seconds,
+        # and assign it to the respective instance variables.
         if (self.longitude_deg_min_sec_dict is not None) and (self.longitude_deg_min_sec is None):
             self.longitude_deg_min_sec = self.__deg_min_sec_dict_to_deg_min_sec_string(self.longitude_deg_min_sec_dict)
+        # If the degrees,minutes,seconds dictionary representation for the latitude is present,
+        # and the degrees,minutes,seconds string representation of the latitude value is not present,
+        # then generate the string representation of the latitude in degrees, minutes, seconds,
+        # and assign it to the respective instance variables.
         if (self.latitude_deg_min_sec_dict is not None) and (self.latitude_deg_min_sec is None):
             self.latitude_deg_min_sec = self.__deg_min_sec_dict_to_deg_min_sec_string(self.latitude_deg_min_sec_dict)
-
+        # Assign the cardinal points in upper case.
         if self.long_ew is not None:
             self.long_ew = (self.long_ew).upper()
         if self.lat_ns is not None:
             self.lat_ns = (self.lat_ns).upper()
         return
 
+    """Function from here on may be edited as needed to fulfil other fields as needed."""
     def __calculate_dictance(self, geo1, geo2):
         """This function will return the kilometer value of the distance between (lat1, lon1), (lat2, lon2)."""
         return_distance = None
@@ -246,7 +307,7 @@ class GeoHandler:
         return return_value
 
     def get_latitude(self, str_format=DEGREES_DECIMAL_FORMAT):
-        return_value=None
+        return_value = None
         if str_format == GeoHandler.DEGREES_DECIMAL_FORMAT:
             if self.latitude_signed_decimal is not None:
                 return_value = str(round(self.latitude_signed_decimal, GeoHandler.DECIMAL_PLACES))

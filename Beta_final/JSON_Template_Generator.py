@@ -106,6 +106,7 @@ def get_fields(filename, header_row=None):
         exit(1)
     return data
 
+
 def write_to_file(data, filename, header_row):
     data["header_row"] = header_row
     with open(filename, 'w') as write_file:
@@ -125,14 +126,6 @@ def main():
     spec_data=get_fields(template_file, template_header)
 
     write_to_file(spec_data, spec_file, template_header)
-    #spec_data["header_row"]=template_header
-
-    #with open(spec_file, 'w') as write_file:
-     #   json.dump(spec_data, write_file, indent=4)
     return
 
-
-#print("Generating JSON file for template...")
-#main()
-#print("JSON file for Template Generated...")
 
