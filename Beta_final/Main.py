@@ -1,8 +1,9 @@
 import configparser
-import JSON_Template_Generator, Data_Loader, Normalizer
 import pathlib2
-import Generate_Input_map
 import json
+from map_Generators import JSON_Template_Generator, Generate_Input_map
+from Load import Data_Loader
+from Normalize import Normalizer
 
 
 def main():

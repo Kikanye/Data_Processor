@@ -14,7 +14,9 @@ import os
 import shutil
 import pathlib2
 import json
-import JSON_Template_Generator, Data_Loader, Normalizer, Generate_Input_map
+from Normalize import Normalizer
+from Load import Data_Loader
+from map_Generators import Generate_Input_map, JSON_Template_Generator
 import configparser
 import traceback
 
