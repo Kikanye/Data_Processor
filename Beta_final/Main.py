@@ -40,20 +40,20 @@ def main():
             exit(-1)
 
     INPUT_FILE = Config.get('INPUT_INFO', 'INPUT_FILE_PATH')
-    input_path_obj=''
+    input_path_obj = ''
     input_filename_split = ''
     if (INPUT_FILE is None) or INPUT_FILE == '':
         print("Input file to load data from.")
         exit(-1)
     else:
-        input_path_obj=pathlib2.Path(INPUT_FILE)
-        if (input_path_obj.exists()):
-            if(input_path_obj.is_file()):
-                input_filename=input_path_obj.name
+        input_path_obj = pathlib2.Path(INPUT_FILE)
+        if input_path_obj.exists():
+            if input_path_obj.is_file():
+                input_filename = input_path_obj.name
                 input_filename_split = input_filename.split('.')
                 extension = input_filename_split[-1].lower()
 
-                if (not((extension == 'xlsx') or (extension == 'csv') or (extension == 'xls'))):
+                if not((extension == 'xlsx') or (extension == 'csv') or (extension == 'xls')):
                     print("Input file must be of type xlsx, csv or xls")
                     exit(-1)
             else:
@@ -62,31 +62,29 @@ def main():
 
     INPUT_SPEC = Config.get('INPUT_INFO', 'INPUT_FILE_MAP')
 
-    if(INPUT_SPEC==''):
+    if INPUT_SPEC == '':
         print("Input map file path not specified, will generate this map by asking questions.")
         input_spec_name = ''.join(input_filename_split[0:len(input_filename_split) - 1]) + '_input_mappings.json'
         INPUT_SPEC_Parent = input_path_obj.parent
-        INPUT_SPEC=str(INPUT_SPEC_Parent.joinpath(input_spec_name))
+        INPUT_SPEC = str(INPUT_SPEC_Parent.joinpath(input_spec_name))
 
     else:
         input_spec_path_obj = pathlib2.Path(INPUT_SPEC)
-        if (input_spec_path_obj.exists()):
-            if(input_spec_path_obj.is_file()):
+        if input_spec_path_obj.exists():
+            if input_spec_path_obj.is_file():
                 input_spec_name = input_spec_path_obj.name
                 input_spec_name_split = input_spec_name.split('.')
                 extension = input_spec_name_split[-1].lower()
 
-                if(not(extension == 'json')):
+                if not(extension == 'json'):
                     print("Input map file must be a json file.")
                     exit(-1)
             else:
                 print("Input file map path must be a file, not a directory")
                 exit(-1)
 
-
-
     input_file_part_name = ''.join(input_filename_split[0:len(input_filename_split)-1])
-    template_path_obj=pathlib2.Path(TEMPLATE_FILE)
+    template_path_obj = pathlib2.Path(TEMPLATE_FILE)
     DATA_FILE = input_file_part_name+'-'+template_path_obj.name
     DATA_FILE = str((template_path_obj.parent).joinpath(DATA_FILE))
     datetime_format = Config.get('INPUT_FORMATS', 'datetime')

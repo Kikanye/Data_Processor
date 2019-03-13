@@ -309,7 +309,10 @@ def normalize(file_name, specs, formats):
     type_dict = {}
     for num in range(len(header_names)):
         type_dict[num] = str
-    dt_frames = pd.read_excel(file_name, names=header_names, encoding='utf-8-sig')
+    if file_name.split('.')[-1] == 'xls' or file_name.split('.')[-1] == 'xlsx':
+        dt_frames = pd.read_excel(file_name, names=header_names, encoding='utf-8-sig')
+    else:
+        raise Exception("The file provided to normalize must be an excel file.")
     dt_frames = dt_frames.fillna('')
     rows = dt_frames.to_dict('records')
     for row in rows:
