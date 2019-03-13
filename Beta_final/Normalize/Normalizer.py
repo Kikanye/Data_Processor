@@ -320,24 +320,41 @@ def normalize(file_name, specs, formats):
 
 
 def writerows(filename, row_list, specs):
+    """
+
+    :param filename: The path to the file which is has been normalized
+    :param row_list: A list of dictionaries, where each dictionary represents a row of data which has been normalized.
+    :param specs: The path to the json file containing the specifications for the template file.
+    :return: The path where the file containing normalized data was saved.
+
+    This function will write the normalized contents of 'filename' to a '.csv' file and append '_normalized' in front
+    of the name of the original file and save it in the same directory.
+    """
+
+    # make a path object from the path of the original file
     f_path = pathlib2.Path(filename)
     fname = f_path.name
+    # Read in the specifications for the template.
     with open(specs) as the_specs:
         template_specs = json.load(the_specs)
+    # Make the name of the new file
     parent_dir = pathlib2.Path(f_path.parent)
     save_path = str(parent_dir.joinpath('_normalized'+'-'+fname))
-    data=pd.DataFrame(row_list)
+    # Make a data frame from the data and process it
+    data = pd.DataFrame(row_list)
     columns_order = template_specs["header_list"]
     save_path_split = save_path.split('.')
     extension = save_path_split[-1]
-    if (extension.lower()).strip()!='csv':
-        save_path_split[-1]='csv'
+    # Ensure that it is a csv file and then save
+    if (extension.lower()).strip() != 'csv':
+        save_path_split[-1] = 'csv'
     save_path = '.'.join(save_path_split)
     data.to_csv(save_path, columns=columns_order, index=False, encoding='utf-8-sig')
     return save_path
 
 
 def main():
+    # TODO: Will prbably remove this function, it is not in use
     print("Starting")
     Config = configparser.ConfigParser()
     Config.read("Normalizer_Config.ini")
